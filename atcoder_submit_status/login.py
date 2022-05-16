@@ -19,7 +19,7 @@ Supported Services:
    subparser.add_argument('--check', action='store_true', help='check whether you are logged in or not')
 
 def run(args: argparse.Namespace) -> bool:
-   service = utils.service_name_from_url(args.url)
+   service = utils.service_from_url(args.url)
 
    if service is None:
       return False
@@ -29,7 +29,7 @@ def run(args: argparse.Namespace) -> bool:
          logger.info(utils.SUCCESS_ICON + ' You have already signed in.')
          return True
       else:
-         logger.info(utils.FAILURE_ICON + 'You are not signed in.')
+         logger.info(utils.FAILURE_ICON + ' are not signed in.')
          if args.check:
             return False
 

@@ -8,6 +8,7 @@ import atcoder_submit_status.__about__ as version
 import atcoder_submit_status.utils as utils
 import atcoder_submit_status.login as subcommands_login
 import atcoder_submit_status.logout as subcommands_logout
+import atcoder_submit_status.watch as subcommands_watch
 import atcoder_submit_status.log_formatter as log_formatter
 
 logger = getLogger(__name__)
@@ -32,6 +33,7 @@ Tips:
    subparsers = parser.add_subparsers(dest='subcommand', help=f'for details, see "{sys.argv[0]} COMMAND --help"')
    subcommands_login.add_subparser(subparsers)
    subcommands_logout.add_subparser(subparsers)
+   subcommands_watch.add_subparser(subparsers)
 
    return parser
 
@@ -46,8 +48,11 @@ def run_program(args: argparse.Namespace, parser: argparse.ArgumentParser) -> in
    if args.subcommand in ['login', 'l']:
       if not subcommands_login.run(args):
          return 1
-   if args.subcommand in ['logout']:
+   elif args.subcommand in ['logout']:
       if not subcommands_logout.run(args):
+         return 1
+   elif args.subcommand in ['watch', 'w']:
+      if not subcommands_watch.run(args):
          return 1
    else:
       parser.print_help(file=sys.stderr)

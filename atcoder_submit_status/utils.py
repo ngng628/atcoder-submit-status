@@ -46,12 +46,13 @@ def new_session_with_our_user_agent(cookie_path: pathlib.Path, service: service.
       logger.info(utils.HINT_ICON + f' You can delete the broken cookie.jar file: {str(cookie_path)}')
       raise
 
-def service_name_from_url(url: str) -> str:
+def service_from_url(url: str) -> str:
    """コンテストURLからサービスを取得
    """
-   if url in 'atcoder':
+   if 'atcoder' in url:
       return service.AtCoderService()
    else:
+      logger.info('service name could not be found.')
       return None
 
 _DEFAULT_SESSION = None
