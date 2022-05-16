@@ -1,8 +1,7 @@
-from curses import REPORT_MOUSE_POSITION
-import colorama
 import requests
 from bs4 import BeautifulSoup
 from colorama import Fore, Back, Style
+import utils
 
 def rgb(r, g, b):
    return "\x1b[48;2;" + str(r) + ";" + str(g) + ";" + str(b) + "m"
@@ -60,9 +59,9 @@ def run():
             
             if key == 'status':
                if submission[key] == 'AC':
-                  submission[key] = rgb(92, 184, 92) + Fore.WHITE + ' ' + submission[key] + ' ' + Style.RESET_ALL
+                  submission[key] = utils.backRGB(92, 184, 92) + Fore.WHITE + ' ' + submission[key] + ' ' + Style.RESET_ALL
                else:
-                  submission[key] = rgb(240, 173, 78) + Fore.WHITE + ' ' + submission[key] + ' ' + Style.RESET_ALL
+                  submission[key] = utils.backRGB(240, 173, 78) + Fore.WHITE + ' ' + submission[key] + ' ' + Style.RESET_ALL
 
 
       for submission in submissions:
