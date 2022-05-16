@@ -40,6 +40,10 @@ class Service:
       pass
 
    @abstractmethod
+   def get_tasks(self, tasks_url, session: Optional[requests.Session] = None):
+      pass
+
+   @abstractmethod
    def get_url(self) -> str:
       pass
 
@@ -106,6 +110,12 @@ class AtCoderService(Service):
          for key in keys:
             max_lengths[key] = max(max_lengths[key], len(submission[key]))
 
+      # 問題名の一覧を取得して十分な幅を確保する
+      tasks_url = self.get_url() + '/contests/' + contest_round + '/tasks'
+      task_names = self.get_task_names(tasks_url=tasks_url, session=session)
+      for name in task_names:
+         max_lengths['task'] = max(max_lengths['task'], len(name))
+
       for submission in submissions:
          for key in keys:
             if key in ['score', 'code_size', 'exec_time', 'memory']:
@@ -152,6 +162,23 @@ class AtCoderService(Service):
                res[i][key] = res[i][key].ljust(max_lengths[key])
 
       return res
+
+   def get_task_names(self, tasks_url, session: Optional[requests.Session] = None) -> List[str]:
+      session = session or utils.get_default_session()
+      response = session.get(tasks_url)
+      response.raise_for_status()
+      soup = BeautifulSoup(response.text, 'lxml')
+      rows = soup.findAll('table', {'class': 'table' })[0].findAll('tr')
+      
+      task_names = []
+      for i in range(len(rows)):
+         if i == 0:
+            continue
+         r = rows[i].findAll('td')
+         task_name = f'{r[0].get_text()} - {r[1].get_text()}'
+         task_names.append(task_name)
+
+      return task_names
 
    def get_url(self):
       return 'https://atcoder.jp'
