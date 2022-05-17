@@ -26,10 +26,16 @@ INPUT_ICON = '[' + Fore.GREEN + '>' + Style.RESET_ALL + ']'
 SUCCESS_ICON = '[' + Fore.BLUE + 'o' + Style.RESET_ALL + ']'
 
 def foreRGB(r: int, g: int, b: int) -> str:
-   return "\x1b[38;2;" + str(r) + ";" + str(g) + ";" + str(b) + "m"
+   r = '{:03}'.format(r)
+   g = '{:03}'.format(g)
+   b = '{:03}'.format(b)
+   return "\x1b[38;2;" + r + ";" + g + ";" + b + "m"
 
 def backRGB(r: int, g: int, b: int) -> str:
-   return "\x1b[48;2;" + str(r) + ";" + str(g) + ";" + str(b) + "m"
+   r = '{:03}'.format(r)
+   g = '{:03}'.format(g)
+   b = '{:03}'.format(b)
+   return "\x1b[48;2;" + r + ";" + g + ";" + b + "m"
 
 @contextlib.contextmanager
 def new_session_with_our_user_agent(cookie_path: pathlib.Path, service: service.Service=None) -> Iterator[requests.Session]:
@@ -46,7 +52,7 @@ def new_session_with_our_user_agent(cookie_path: pathlib.Path, service: service.
       logger.info(utils.HINT_ICON + f' You can delete the broken cookie.jar file: {str(cookie_path)}')
       raise
 
-def service_from_url(url: str) -> str:
+def service_from_url(url: str) -> service.Service:
    """コンテストURLからサービスを取得
    """
    if 'atcoder' in url:

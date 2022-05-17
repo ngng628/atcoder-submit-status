@@ -103,13 +103,25 @@ class AtCoderService(Service):
          if i == 0:
             continue
          r = rows[i].findAll('td')
-         submission = { keys[i]: r[i].get_text() for i in range(len(keys)) }
+         submission = {}
+         for i in range(len(keys)):
+            if i < len(r) - 1:  # "Detail" の分、1個引く
+               submission[keys[i]] = r[i].get_text()
+            else:
+               submission[keys[i]] = ''
          submission['submission_time'] = submission['submission_time'][:16]
          submission['user'] = submission['user'].rstrip(' ')  # 謎の空白
+
+         # TODO: 汚いよ
+         if submission['status'] not in ['AC', 'CE', 'MLE', 'TLE', 'RE', 'OLE', 'IE', 'WA']:
+            submission['status'] = submission['status'] + submission['exec_time']
+         st = submission['status'][-3:].lstrip()
+         color = self._get_status_color(st)
+         submission['status'] = Style.RESET_ALL + color + Fore.WHITE + ' ' + submission['status'] + ' ' + Style.RESET_ALL
+
          submissions.append(submission)
          for key in keys:
             max_lengths[key] = max(max_lengths[key], len(submission[key]))
-
       # 問題名の一覧を取得して十分な幅を確保する
       tasks_url = self.get_url() + '/contests/' + contest_round + '/tasks'
       task_names = self.get_task_names(tasks_url=tasks_url, session=session)
@@ -120,15 +132,12 @@ class AtCoderService(Service):
          for key in keys:
             if key in ['score', 'code_size', 'exec_time', 'memory']:
                submission[key] = submission[key].rjust(max_lengths[key])
+            elif key in ['status']:
+               submission[key] = submission[key].center(max_lengths[key])
             else:
                submission[key] = submission[key].ljust(max_lengths[key])
             
-            if key == 'status':
-               if submission[key] == 'AC':
-                  submission[key] = utils.backRGB(92, 184, 92) + Fore.WHITE + ' ' + submission[key] + ' ' + Style.RESET_ALL
-               else:
-                  submission[key] = utils.backRGB(240, 173, 78) + Fore.WHITE + ' ' + submission[key] + ' ' + Style.RESET_ALL
-
+      submissions.reverse()
       return submissions
 
    def minimize_submissions_info(self, submissions):
@@ -193,3 +202,14 @@ class AtCoderService(Service):
          url = url + '/'
       res = url[prefix_len:url.find('/', prefix_len)]
       return res
+   
+   def _get_status_color(self, status: str):
+      green = ['AC']
+      yellow = ['CE', 'MLE', 'TLE', 'RE', 'OLE', 'IE', 'WA']
+      gray_status = ['WJ']
+      if status in green:
+         return utils.backRGB(92, 184, 92)
+      elif status in yellow:
+         return utils.backRGB(240, 173, 78)
+      else:
+         return utils.backRGB(153, 153, 153)

@@ -18,12 +18,12 @@ Supported Services:
    subparser.add_argument('--check', action='store_true', help='check whether you are logged out or not')
 
 def run(args: argparse.Namespace) -> bool:
-   service = utils.service_name_from_url(args.url)
+   service = utils.service_from_url(args.url)
 
    if service is None:
       return False
    
-   cookie_path = utils.get_cookie_path(service)
+   cookie_path = utils.get_cookie_path(service=service)
    if os.path.exists(cookie_path):
       os.remove(cookie_path)
       logger.info(f'delete cookie to {cookie_path}')
