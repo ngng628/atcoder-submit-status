@@ -1,4 +1,6 @@
 import argparse
+from email.policy import default
+import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 import getpass
@@ -19,20 +21,20 @@ def add_subparser(subparsers: argparse.Action) -> None:
 Supported Services:
   √ AtCoder
 ''')
-   subparser.add_argument('url')
-   subparser.add_argument('--minimal', '-m', action='store_true', help='show minimal data')
+   subparser.add_argument('url', help='Contest URL')
+   subparser.add_argument('--info-mode', default=1, type=int, help='If $INFO_MODE == 0: minimum information\nIf $INFO_MODE == 1: medium information\nIf $INFO_MODE == 2: maximum information\ndefault setting is `1`')
+   subparser.add_argument('-t', '--tail', default=sys.maxsize, type=int, help='Print the last $TAIL submissions')
 
 def _fetch(args: argparse.Namespace, service: service.Service, session: Optional[requests.Session] = None):
    session = session or utils.get_default_session()
    submissions = service.fetch_submissions(args.url, users=[], session=session)
-   if args.minimal:
-      logger.debug('Minimal')
-      submissions = service.minimize_submissions_info(submissions)
+   if args.info_mode != 2:
+      submissions = service.minimize_submissions_info(submissions, args.info_mode)
    return submissions
 
-def _draw(submissions):
+def _draw(args: argparse.Namespace, submissions):
    print('\x1b[J', end='')
-   for s in submissions:
+   for s in submissions[-args.tail:]:
       disp = ' │ '.join(it for it in s.values())
       print(disp)
 
@@ -52,7 +54,7 @@ def run(args: argparse.Namespace) -> bool:
          return False
 
       old_submissions = _fetch(args, service=service, session=session)
-      _draw(old_submissions)
+      _draw(args, old_submissions)
       while True:
          time.sleep(1)
 

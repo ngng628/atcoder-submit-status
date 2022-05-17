@@ -36,7 +36,7 @@ class Service:
       pass
 
    @abstractmethod
-   def minimize_submissions_info(self, submissions):
+   def minimize_submissions_info(self, submissions, mode):
       pass
 
    @abstractmethod
@@ -140,17 +140,23 @@ class AtCoderService(Service):
       submissions.reverse()
       return submissions
 
-   def minimize_submissions_info(self, submissions):
+   def minimize_submissions_info(self, submissions, mode):
       res = deepcopy(submissions)
       for i in range(len(res)):
          if 'submission_time' in res[i]:
-            res[i].pop('submission_time')
+            if mode == 0:
+               res[i].pop('submission_time')
+            elif mode == 1:
+               res[i]['submission_time'] = res[i]['submission_time'][-5:]
          if 'task' in res[i]:
             tmp = res[i]['task']
             tmp = tmp[:tmp.find(' ')]
             res[i]['task'] = tmp
          if 'language' in res[i]:
-            res[i].pop('language')
+            if mode == 0:
+               res[i].pop('language')
+            elif mode == 1:
+               res[i]['language'] = res[i]['language'][:res[i]['language'].find(' ')]
          if 'code_size' in res[i]:
             res[i].pop('code_size')
          if 'exec_time' in res[i]:
@@ -158,7 +164,7 @@ class AtCoderService(Service):
          if 'memory' in res[i]:
             res[i].pop('memory')
 
-      keys = ['task', 'user', 'score', 'status']
+      keys = [key for key in res[0].keys()] if len(res) > 0 else []
       max_lengths = { key: 0 for key in keys }
       for i in range(len(res)):
          for key in keys:
