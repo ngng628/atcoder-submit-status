@@ -1,4 +1,5 @@
 import argparse
+import sys
 from email.policy import default
 import sys
 import time
@@ -55,14 +56,17 @@ def run(args: argparse.Namespace) -> bool:
 
       old_submissions = _fetch(args, service=service, session=session)
       _draw(args, old_submissions)
-      while True:
-         time.sleep(1)
+      try:
+         while True:
+            time.sleep(1)
 
-         submissions = _fetch(args, service=service, session=session)
+            submissions = _fetch(args, service=service, session=session)
 
-         # TODO: データが増えることを前提としている
-         if old_submissions != submissions:
-            n = len(old_submissions)
-            print('\x1b[' + str(n) + 'F', end='')
-            _draw(submissions=submissions)
-            old_submissions = submissions
+            # TODO: データが増えることを前提としている
+            if old_submissions != submissions:
+               n = len(old_submissions)
+               print('\x1b[' + str(n) + 'F', end='')
+               _draw(submissions=submissions)
+               old_submissions = submissions
+      except KeyboardInterrupt:
+         sys.exit(0)
