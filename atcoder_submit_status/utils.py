@@ -1,5 +1,6 @@
 import pathlib
 import contextlib
+import sys
 import appdirs
 import requests
 from logging import getLogger
@@ -48,7 +49,7 @@ def new_session_with_our_user_agent(cookie_path: pathlib.Path, service: service.
    try:
       with utils.with_cookiejar(session, path=cookie_path) as session:
          yield session
-   except:
+   except Exception as e:
       logger.info(utils.HINT_ICON + f' You can delete the broken cookie.jar file: {str(cookie_path)}')
       raise
 
