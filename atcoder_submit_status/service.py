@@ -33,7 +33,7 @@ class Service:
       pass
 
    @abstractmethod
-   def fetch_submissions(self, url, users, session):
+   def fetch_submissions(self, url, no_color, users, session):
       pass
 
    @abstractmethod
@@ -80,7 +80,7 @@ class AtCoderService(Service):
       else:
          return False
    
-   def fetch_submissions(self, url, users = [], session: Optional[requests.Session] = None):
+   def fetch_submissions(self, url, no_color = False, users = [], session: Optional[requests.Session] = None):
       session = session or utils.get_default_session()
 
       contest_round = self.get_round(url)
@@ -99,7 +99,7 @@ class AtCoderService(Service):
          response.raise_for_status()
          soup = BeautifulSoup(response.text, 'lxml')
          
-         tables = soup.findAll('table', {'class': 'table' }) 
+         tables = soup.findAll('table', { 'class': 'table' }) 
          if not tables:
             break
          rows = tables[0].findAll('tr')
@@ -124,8 +124,9 @@ class AtCoderService(Service):
                submission['status'] = submission['status'] + submission['exec_time']
             st = submission['status'][-3:].lstrip()
             ## `status` には色を付ける
-            color = self._get_status_color(st)
-            submission['status'] = Style.RESET_ALL + color + Fore.WHITE + ' ' + submission['status'] + ' ' + Style.RESET_ALL
+            if not no_color:
+               color = self._get_status_color(st)
+               submission['status'] = Style.RESET_ALL + color + Fore.WHITE + ' ' + submission['status'] + ' ' + Style.RESET_ALL
 
             submissions.append(submission)
             for key in keys:

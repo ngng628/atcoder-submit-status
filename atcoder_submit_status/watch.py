@@ -23,12 +23,14 @@ Supported Services:
   √ AtCoder
 ''')
    subparser.add_argument('url', help='Contest URL')
+   subparser.add_argument('--no-color', action='store_true', help='Turn off color')
+   subparser.add_argument('-r', '--reverse', action='store_true', help='Reverse submissions')
    subparser.add_argument('--info-mode', default=1, type=int, help='If $INFO_MODE == 0: minimum information\nIf $INFO_MODE == 1: medium information\nIf $INFO_MODE == 2: maximum information\ndefault setting is `1`')
    subparser.add_argument('-t', '--tail', default=sys.maxsize, type=int, help='Print the last $TAIL submissions')
 
 def _fetch(args: argparse.Namespace, service: service.Service, session: Optional[requests.Session] = None):
    session = session or utils.get_default_session()
-   submissions = service.fetch_submissions(args.url, users=[], session=session)
+   submissions = service.fetch_submissions(args.url, no_color=args.no_color, users=[], session=session)
    if args.info_mode != 2:
       submissions = service.minimize_submissions_info(submissions, args.info_mode)
    return submissions
@@ -55,18 +57,22 @@ def run(args: argparse.Namespace) -> bool:
          return False
 
       old_submissions = _fetch(args, service=service, session=session)
+      if args.reverse:
+         old_submissions.reverse()
       _draw(args, old_submissions)
       try:
          while True:
             time.sleep(1)
 
             submissions = _fetch(args, service=service, session=session)
+            if args.reverse:
+               submissions.reverse()
 
             # TODO: データが増えることを前提としている
             if old_submissions != submissions:
                n = len(old_submissions)
                print('\x1b[' + str(n) + 'F', end='')
-               _draw(submissions=submissions)
+               _draw(args, submissions=submissions)
                old_submissions = submissions
       except KeyboardInterrupt:
          sys.exit(0)
