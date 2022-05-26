@@ -3,6 +3,7 @@ import contextlib
 import sys
 import appdirs
 import requests
+import datetime
 from logging import getLogger
 from typing import *
 import http
@@ -38,11 +39,14 @@ def backRGB(r: int, g: int, b: int) -> str:
    b = '{:03}'.format(b)
    return "\x1b[48;2;" + r + ";" + g + ";" + b + "m"
 
+def convert_timestamp_with_time_zone_to_date(timestamp: str) -> str:
+   date = datetime.datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S%z')
+   return date.strftime('%Y-%m-%d %H:%M:%S')
+
 @contextlib.contextmanager
 def new_session_with_our_user_agent(cookie_path: pathlib.Path, service: service.Service=None) -> Iterator[requests.Session]:
    if service is not None:
       cookie_path = get_cookie_path(service)
-   print('Cookie Path =', cookie_path)
    session = requests.Session()
    session.headers['User-Agent'] = f'{version.__package_name__}/{version.__version__} (+{version.__url__})'
    logger.debug(f'User-Agent: {session.headers["User-Agent"]}')

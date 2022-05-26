@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+import time
 from contextlib import AbstractContextManager
 from copy import deepcopy
 import re
@@ -69,7 +70,6 @@ class AtCoderService(Service):
 
    def logout(self):
       pass
-      # os.remove()
 
    def is_logged_in(self, session: Optional[requests.Session] = None) -> bool:
       session = session or utils.get_default_session()
@@ -90,38 +90,49 @@ class AtCoderService(Service):
       if len(users) > 0:
          pass
 
-      response = session.get(submissions_url)
-      response.raise_for_status()
-      soup = BeautifulSoup(response.text, 'lxml')
-      
-      rows = soup.findAll('table', {'class': 'table' })[0].findAll('tr')
-
       submissions = []
-      keys = ['submission_time', 'task', 'user', 'language', 'score', 'code_size', 'status', 'exec_time', 'memory']
+      keys = self._get_all_headers()
       max_lengths = { key: 0 for key in keys }
-      for i in range(len(rows)):
-         if i == 0:
-            continue
-         r = rows[i].findAll('td')
-         submission = {}
-         for i in range(len(keys)):
-            if i < len(r) - 1:  # "Detail" の分、1個引く
-               submission[keys[i]] = r[i].get_text()
-            else:
-               submission[keys[i]] = ''
-         submission['submission_time'] = submission['submission_time'][:16]
-         submission['user'] = submission['user'].rstrip(' ')  # 謎の空白
+      page = 1
+      while True:  # page がなくなるまで
+         response = session.get(submissions_url + f'?page={page}')
+         response.raise_for_status()
+         soup = BeautifulSoup(response.text, 'lxml')
+         
+         tables = soup.findAll('table', {'class': 'table' }) 
+         if not tables:
+            break
+         rows = tables[0].findAll('tr')
 
-         # TODO: 汚いよ
-         if submission['status'] not in ['AC', 'CE', 'MLE', 'TLE', 'RE', 'OLE', 'IE', 'WA']:
-            submission['status'] = submission['status'] + submission['exec_time']
-         st = submission['status'][-3:].lstrip()
-         color = self._get_status_color(st)
-         submission['status'] = Style.RESET_ALL + color + Fore.WHITE + ' ' + submission['status'] + ' ' + Style.RESET_ALL
+         for i in range(len(rows)):
+            if i == 0:
+               continue
 
-         submissions.append(submission)
-         for key in keys:
-            max_lengths[key] = max(max_lengths[key], len(submission[key]))
+            # HTMLの内容をパース
+            r = rows[i].findAll('td')
+            submission = {}
+            for i in range(len(keys)):
+               if i < len(r) - 1:  # "Detail" の分、1個引く
+                  submission[keys[i]] = r[i].get_text().strip()
+               else:
+                  submission[keys[i]] = ''
+
+            # データを整形する
+            submission['submission_time'] = utils.convert_timestamp_with_time_zone_to_date(submission['submission_time'])
+            ## もし、WJ 5/12 や WA 5/12 の状態であれば、便宜上分けてパースしてしまったものをくっつける
+            if submission['status'] not in self._get_statuses():
+               submission['status'] = submission['status'] + submission['exec_time']
+            st = submission['status'][-3:].lstrip()
+            ## `status` には色を付ける
+            color = self._get_status_color(st)
+            submission['status'] = Style.RESET_ALL + color + Fore.WHITE + ' ' + submission['status'] + ' ' + Style.RESET_ALL
+
+            submissions.append(submission)
+            for key in keys:
+               max_lengths[key] = max(max_lengths[key], len(submission[key]))
+         time.sleep(0.5)
+         page += 1
+
       # 問題名の一覧を取得して十分な幅を確保する
       tasks_url = self.get_url() + '/contests/' + contest_round + '/tasks'
       task_names = self.get_task_names(tasks_url=tasks_url, session=session)
@@ -146,8 +157,6 @@ class AtCoderService(Service):
          if 'submission_time' in res[i]:
             if mode == 0:
                res[i].pop('submission_time')
-            elif mode == 1:
-               res[i]['submission_time'] = res[i]['submission_time'][-5:]
          if 'task' in res[i]:
             tmp = res[i]['task']
             tmp = tmp[:tmp.find(' ')]
@@ -209,6 +218,13 @@ class AtCoderService(Service):
       res = url[prefix_len:url.find('/', prefix_len)]
       return res
    
+# private
+   def _get_all_headers(self) -> List[str]:
+      return ['submission_time', 'task', 'user', 'language', 'score', 'code_size', 'status', 'exec_time', 'memory']
+
+   def _get_statuses(self) -> List[str]:
+      return ['AC', 'CE', 'MLE', 'TLE', 'RE', 'OLE', 'IE', 'WA']
+
    def _get_status_color(self, status: str):
       green = ['AC']
       yellow = ['CE', 'MLE', 'TLE', 'RE', 'OLE', 'IE', 'WA']
