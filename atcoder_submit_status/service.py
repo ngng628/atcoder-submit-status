@@ -1,4 +1,6 @@
 from abc import ABCMeta, abstractmethod
+from datetime import datetime
+import sys
 import time
 from contextlib import AbstractContextManager
 from copy import deepcopy
@@ -80,11 +82,18 @@ class AtCoderService(Service):
       else:
          return False
    
-   def fetch_submissions(self, url, no_color = False, users = [], session: Optional[requests.Session] = None):
+   def fetch_submissions(self, url: str, no_color: bool = False, users: List[str] = [], session: Optional[requests.Session] = None):
       session = session or utils.get_default_session()
 
       contest_round = self.get_round(url)
-      submissions_url = self.get_url() + '/contests/' + contest_round + '/submissions/me' 
+      submissions_url = self.get_url() + '/contests/' + contest_round + '/submissions'
+      if not users:
+         name = self._get_user_name()
+         if name:
+            users.append(name)
+         else:
+            logger.info(utils.FAILURE_ICON + 'users not found.')
+            sys.exit(0)
 
       # TODO
       if len(users) > 0:
@@ -93,47 +102,50 @@ class AtCoderService(Service):
       submissions = []
       keys = self._get_all_headers()
       max_lengths = { key: 0 for key in keys }
-      page = 1
-      while True:  # page がなくなるまで
-         response = session.get(submissions_url + f'?page={page}')
-         response.raise_for_status()
-         soup = BeautifulSoup(response.text, 'lxml')
-         
-         tables = soup.findAll('table', { 'class': 'table' }) 
-         if not tables:
-            break
-         rows = tables[0].findAll('tr')
+      for user in users:
+         page = 1
+         while True:  # page がなくなるまで
+            payload = { 'f.User': user, 'page': page }
+            response = session.get(submissions_url, params=payload)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, 'lxml')
+            
+            tables = soup.findAll('table', { 'class': 'table' }) 
+            if not tables:
+               break
+            rows = tables[0].findAll('tr')
 
-         for i in range(len(rows)):
-            if i == 0:
-               continue
+            for i in range(len(rows)):
+               if i == 0:
+                  continue
 
-            # HTMLの内容をパース
-            r = rows[i].findAll('td')
-            submission = {}
-            for i in range(len(keys)):
-               if i < len(r) - 1:  # "Detail" の分、1個引く
-                  submission[keys[i]] = r[i].get_text().strip()
-               else:
-                  submission[keys[i]] = ''
+               # HTMLの内容をパース
+               r = rows[i].findAll('td')
+               submission = {}
+               for i in range(len(keys)):
+                  if i < len(r) - 1:  # "Detail" の分、1個引く
+                     submission[keys[i]] = r[i].get_text().strip()
+                  else:
+                     submission[keys[i]] = ''
 
-            # データを整形する
-            submission['submission_time'] = utils.convert_timestamp_with_time_zone_to_date(submission['submission_time'])
-            ## もし、WJ 5/12 や WA 5/12 の状態であれば、便宜上分けてパースしてしまったものをくっつける
-            if submission['status'] not in self._get_statuses():
-               submission['status'] = submission['status'] + submission['exec_time']
-            st = submission['status'][-3:].lstrip()
-            ## `status` には色を付ける
-            if not no_color:
-               color = self._get_status_color(st)
-               submission['status'] = Style.RESET_ALL + color + Fore.WHITE + ' ' + submission['status'] + ' ' + Style.RESET_ALL
+               # データを整形する
+               submission['submission_time'] = utils.convert_timestamp_with_time_zone_to_date(submission['submission_time'])
+               ## もし、WJ 5/12 や WA 5/12 の状態であれば、便宜上分けてパースしてしまったものをくっつける
+               if submission['status'] not in self._get_statuses():
+                  submission['status'] = submission['status'] + submission['exec_time']
+               st = submission['status'][-3:].lstrip()
+               ## `status` には色を付ける
+               if not no_color:
+                  color = self._get_status_color(st)
+                  submission['status'] = Style.RESET_ALL + color + Fore.WHITE + ' ' + submission['status'] + ' ' + Style.RESET_ALL
 
-            submissions.append(submission)
-            for key in keys:
-               max_lengths[key] = max(max_lengths[key], len(submission[key]))
-         time.sleep(0.5)
-         page += 1
+               submissions.append(submission)
+               for key in keys:
+                  max_lengths[key] = max(max_lengths[key], len(submission[key]))
+            time.sleep(0.5)
+            page += 1
 
+      submissions = sorted(submissions, key=lambda x: datetime.strptime(x['submission_time'], '%Y-%m-%d %H:%M:%S'), reverse=True)
       # 問題名の一覧を取得して十分な幅を確保する
       tasks_url = self.get_url() + '/contests/' + contest_round + '/tasks'
       task_names = self.get_task_names(tasks_url=tasks_url, session=session)
@@ -156,16 +168,16 @@ class AtCoderService(Service):
       res = deepcopy(submissions)
       for i in range(len(res)):
          if 'submission_time' in res[i]:
-            if mode == 0:
+            if mode == 'MINIMAL':
                res[i].pop('submission_time')
          if 'task' in res[i]:
             tmp = res[i]['task']
             tmp = tmp[:tmp.find(' ')]
             res[i]['task'] = tmp
          if 'language' in res[i]:
-            if mode == 0:
+            if mode == 'MINIMAL':
                res[i].pop('language')
-            elif mode == 1:
+            elif mode == 'NORMAL':
                res[i]['language'] = res[i]['language'][:res[i]['language'].find(' ')]
          if 'code_size' in res[i]:
             res[i].pop('code_size')
@@ -220,6 +232,15 @@ class AtCoderService(Service):
       return res
    
 # private
+   def _get_user_name(self) -> str:
+      with open(utils.get_cookie_path(self)) as f:
+         res = re.search(r'UserName%3A(.*?)%00', f.read())
+         if res:
+            s = res.group(1)
+            return s
+         else:
+            return None
+
    def _get_all_headers(self) -> List[str]:
       return ['submission_time', 'task', 'user', 'language', 'score', 'code_size', 'status', 'exec_time', 'memory']
 

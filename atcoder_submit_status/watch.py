@@ -1,4 +1,5 @@
 import argparse
+from random import choices
 import sys
 from email.policy import default
 import sys
@@ -25,13 +26,14 @@ Supported Services:
    subparser.add_argument('url', help='Contest URL')
    subparser.add_argument('--no-color', action='store_true', help='Turn off color')
    subparser.add_argument('-r', '--reverse', action='store_true', help='Reverse submissions')
-   subparser.add_argument('--info-mode', default=1, type=int, help='If $INFO_MODE == 0: minimum information\nIf $INFO_MODE == 1: medium information\nIf $INFO_MODE == 2: maximum information\ndefault setting is `1`')
+   subparser.add_argument('-u', '--users', default=[], nargs='*', help='Watch users.')
+   subparser.add_argument('--info-mode', default='NORMAL', choices=['MINIMAL', 'NORMAL', 'DETAILS'], help='表示の細かさを設定します')
    subparser.add_argument('-t', '--tail', default=sys.maxsize, type=int, help='Print the last $TAIL submissions')
 
 def _fetch(args: argparse.Namespace, service: service.Service, session: Optional[requests.Session] = None):
    session = session or utils.get_default_session()
-   submissions = service.fetch_submissions(args.url, no_color=args.no_color, users=[], session=session)
-   if args.info_mode != 2:
+   submissions = service.fetch_submissions(args.url, no_color=args.no_color, users=args.users, session=session)
+   if args.info_mode != 'DETAILS':
       submissions = service.minimize_submissions_info(submissions, args.info_mode)
    return submissions
 
@@ -44,6 +46,7 @@ def _draw(args: argparse.Namespace, submissions):
 
 def run(args: argparse.Namespace) -> bool:
    logger.debug('called watch')
+   logger.debug(f'users: {args.users}')
    service = utils.service_from_url(args.url)
 
    if service is None:
