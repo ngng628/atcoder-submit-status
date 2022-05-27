@@ -35,7 +35,7 @@ class Service:
       pass
 
    @abstractmethod
-   def fetch_submissions(self, url, no_color, users, session):
+   def fetch_submissions(self, url, no_color, tasks, languages, statuses, users, session):
       pass
 
    @abstractmethod
@@ -82,11 +82,19 @@ class AtCoderService(Service):
       else:
          return False
    
-   def fetch_submissions(self, url: str, no_color: bool = False, users: List[str] = [], session: Optional[requests.Session] = None):
+   def fetch_submissions(self, url: str, no_color: bool = False, tasks: List[str] = [], languages: List[str] = [], statuses: List[str] = [], users: List[str] = [], session: Optional[requests.Session] = None):
       session = session or utils.get_default_session()
 
       contest_round = self.get_round(url)
       submissions_url = self.get_url() + '/contests/' + contest_round + '/submissions'
+
+      # フィルタ用データの調整
+      if not tasks:
+         tasks.append(None)
+      if not languages:
+         languages.append(None)
+      if not statuses:
+         statuses.append(None)
       if not users:
          name = self._get_user_name()
          if name:
@@ -95,17 +103,30 @@ class AtCoderService(Service):
             logger.info(utils.FAILURE_ICON + 'users not found.')
             sys.exit(0)
 
-      # TODO
-      if len(users) > 0:
-         pass
+      conditions = []
+      for task in tasks:
+         for language in languages:
+            for status in statuses:
+               for user in users:
+                  conditions.append((task, language, status, user))
 
       submissions = []
       keys = self._get_all_headers()
       max_lengths = { key: 0 for key in keys }
-      for user in users:
+      for task, language, status, user in conditions:
          page = 1
          while True:  # page がなくなるまで
-            payload = { 'f.User': user, 'page': page }
+            payload = { 'page': page }
+            if task:
+               if contest_round[:3] == 'ABC' and task == 'ex':
+                  task = 'h'
+               payload['f.Task'] = f'{contest_round}_{task}'
+            if language:
+               payload['f.LanguageName'] = language
+            if status:
+               payload['f.Status'] = status
+            if user:
+               payload['f.User'] = user
             response = session.get(submissions_url, params=payload)
             response.raise_for_status()
             soup = BeautifulSoup(response.text, 'lxml')

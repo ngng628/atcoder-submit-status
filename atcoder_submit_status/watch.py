@@ -1,11 +1,8 @@
 import argparse
-from random import choices
 import sys
 from email.policy import default
 import sys
 import time
-from concurrent.futures import ThreadPoolExecutor
-import getpass
 from typing import Optional
 import requests
 from logging import getLogger
@@ -26,13 +23,16 @@ Supported Services:
    subparser.add_argument('url', help='Contest URL')
    subparser.add_argument('--no-color', action='store_true', help='Turn off color')
    subparser.add_argument('-r', '--reverse', action='store_true', help='Reverse submissions')
+   subparser.add_argument('--tasks', default=[], nargs='*', help='Select tasks.\n(e.g. a b d ex)')
+   subparser.add_argument('--languages', default=[], nargs='*', help='Select languages.\n(e.g. C++ C#)')
+   subparser.add_argument('--statuses', default=[], nargs='*', choices=['AC', 'CE', 'MLE', 'TLE', 'RE', 'OLE', 'IE', 'WA'], help='Select statuses.\n(e.g. WA TLE)')
    subparser.add_argument('-u', '--users', default=[], nargs='*', help='Watch users.')
    subparser.add_argument('--info-mode', default='NORMAL', choices=['MINIMAL', 'NORMAL', 'DETAILS'], help='表示の細かさを設定します')
    subparser.add_argument('-t', '--tail', default=sys.maxsize, type=int, help='Print the last $TAIL submissions')
 
 def _fetch(args: argparse.Namespace, service: service.Service, session: Optional[requests.Session] = None):
    session = session or utils.get_default_session()
-   submissions = service.fetch_submissions(args.url, no_color=args.no_color, users=args.users, session=session)
+   submissions = service.fetch_submissions(args.url, no_color=args.no_color, tasks=args.tasks, languages=args.languages, statuses=args.statuses, users=args.users, session=session)
    if args.info_mode != 'DETAILS':
       submissions = service.minimize_submissions_info(submissions, args.info_mode)
    return submissions
