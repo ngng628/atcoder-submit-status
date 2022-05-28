@@ -1,12 +1,10 @@
 import argparse
 import sys
-from email.policy import default
 import sys
 import time
 from typing import Optional
 import requests
 from logging import getLogger
-from bs4 import BeautifulSoup
 from colorama import Fore, Back, Style
 
 import atcoder_submit_status.utils as utils
@@ -55,8 +53,8 @@ def run(args: argparse.Namespace) -> bool:
    with utils.new_session_with_our_user_agent(args.cookie, service=service) as session:
       logger.debug('start session')
       if not service.is_logged_in(session):
-         logger.info(utils.FAILURE_ICON + ' You are not signed in.')
-         logger.info(utils.HINT_ICON + ' You can try to enter this command: `acss login URL`')
+         logger.info(utils.FAILURE + 'You are not signed in.')
+         logger.info(utils.HINT + 'You can try to enter this command: `acss login URL`')
          return False
 
       old_submissions = _fetch(args, service=service, session=session)

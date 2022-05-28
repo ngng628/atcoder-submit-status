@@ -1,8 +1,10 @@
 import argparse
+from ast import parse
+from distutils.log import ERROR
 from email.errors import HeaderParseError
 import sys
 from typing import *
-from logging import DEBUG, INFO, StreamHandler, basicConfig, getLogger
+from logging import CRITICAL, WARN, DEBUG, INFO, StreamHandler, basicConfig, getLogger
 import pathlib
 import atcoder_submit_status.__about__ as version
 import atcoder_submit_status.utils as utils
@@ -28,6 +30,7 @@ Tips:
 
    parser.add_argument('-v', '--verbose', action='store_true')
    parser.add_argument('-c', '--cookie', type=pathlib.Path, default=utils.DEFAULT_COOKIE_PATH, help=f'path to cookie. (default: {utils.DEFAULT_COOKIE_PATH})')
+   parser.add_argument('-q', '--quiet', action='count', default=0, help='Give less output. Option is additive, and can be used up to 3 times.')
    parser.add_argument('--version', action='store_true', help='print the atcoder-submit-status version number.')
 
    subparsers = parser.add_subparsers(dest='subcommand', help=f'for details, see "{sys.argv[0]} COMMAND --help"')
@@ -66,6 +69,13 @@ def main(args: Optional[List[str]] = None) -> 'NoReturn':
    level = INFO
    if parsed.verbose:
       level = DEBUG
+   if parsed.quiet == 1:
+      level = WARN
+   elif parsed.quiet == 2:
+      level = ERROR
+   elif parsed.quiet == 3:
+      level = CRITICAL
+
    handler = StreamHandler(sys.stdout)
    handler.setFormatter(log_formatter.LogFormatter())
    basicConfig(level=level, handlers=[handler])

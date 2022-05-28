@@ -19,13 +19,15 @@ DEFAULT_COOKIE_PATH = USER_DATA_PATH / 'cookie.jar'
 def get_cookie_path(service: service.Service):
    return USER_DATA_PATH / service.get_name() / 'cookie.jar'
 
-CHECK_ICON = '[' + Fore.MAGENTA + 'v' + Style.RESET_ALL + ']'
-ADD_ICON = '[' + Fore.GREEN + '+' + Style.RESET_ALL + ']'
-DISPLAY_ICON = '[' + Fore.GREEN + '*' + Style.RESET_ALL + ']'
-FAILURE_ICON = '[' + Fore.RED + 'x' + Style.RESET_ALL + ']'
-HINT_ICON = '[' + Fore.YELLOW + '?' + Style.RESET_ALL + ']'
-INPUT_ICON = '[' + Fore.GREEN + '>' + Style.RESET_ALL + ']'
-SUCCESS_ICON = '[' + Fore.BLUE + 'o' + Style.RESET_ALL + ']'
+CHECK = 'CHECK: '
+ADD = 'ADD: '
+NETWORK = 'NETWORK: '
+DISPLAY = 'DISPLAY: '
+FAILURE = 'FAILURE: '
+HINT = 'HINT: '
+INPUT = 'INPUT: '
+SUCCESS = 'SUCCESS: '
+INPUT_ICON = '[' + Fore.YELLOW + '>' + Style.RESET_ALL + '] '
 
 def foreRGB(r: int, g: int, b: int) -> str:
    r = '{:03}'.format(r)
@@ -54,7 +56,7 @@ def new_session_with_our_user_agent(cookie_path: pathlib.Path, service: service.
       with utils.with_cookiejar(session, path=cookie_path) as session:
          yield session
    except Exception as e:
-      logger.info(utils.HINT_ICON + f' You can delete the broken cookie.jar file: {str(cookie_path)}')
+      logger.info(utils.HINT + f'You can delete the broken cookie.jar file: {str(cookie_path)}')
       raise
 
 def service_from_url(url: str) -> service.Service:

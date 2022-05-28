@@ -14,11 +14,11 @@ def add_subparser(subparsers: argparse.Action) -> None:
 Supported Services:
   √ AtCoder
 ''')
-   subparser.add_argument('url')
+   subparser.add_argument('service', choices=['atcoder'])
    subparser.add_argument('--check', action='store_true', help='check whether you are logged out or not')
 
 def run(args: argparse.Namespace) -> bool:
-   service = utils.service_from_url(args.url)
+   service = utils.service_from_url(args.service)
 
    if service is None:
       return False
@@ -27,10 +27,10 @@ def run(args: argparse.Namespace) -> bool:
    if os.path.exists(cookie_path):
       os.remove(cookie_path)
       logger.info(f'delete cookie to {cookie_path}')
-      logger.info(utils.SUCCESS_ICON + ' You have already signed out.')
+      logger.info(utils.SUCCESS + 'You have already signed out.')
       return True
    else:
-      logger.info(utils.FAILURE_ICON + 'You are not signed in.')
+      logger.info(utils.FAILURE + 'You are not signed in.')
       if args.check:
          return False
       return True

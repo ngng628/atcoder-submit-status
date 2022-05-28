@@ -2,11 +2,8 @@ from abc import ABCMeta, abstractmethod
 from datetime import datetime
 import sys
 import time
-from contextlib import AbstractContextManager
 from copy import deepcopy
 import re
-import pathlib
-from sys import prefix
 from typing import *
 import requests
 from bs4 import BeautifulSoup
@@ -26,10 +23,6 @@ class Service:
    def login(self, username, password, session):
       pass
 
-   @abstractmethod
-   def logout(self):
-      pass
-   
    @abstractmethod
    def is_logged_in(self) -> bool:
       pass
@@ -63,6 +56,7 @@ class AtCoderService(Service):
       if self.is_logged_in(session=session):
          return
       url = self.get_login_page_url()
+      logger.info(utils.NETWORK + f'GET: {url}')
       response = session.get(url)
       soup = BeautifulSoup(response.text, 'lxml')
       csrf_token = soup.find(attrs={'name': 'csrf_token'}).get('value')
@@ -70,12 +64,10 @@ class AtCoderService(Service):
       response = session.post(url, data=login_info)
       response.raise_for_status()
 
-   def logout(self):
-      pass
-
    def is_logged_in(self, session: Optional[requests.Session] = None) -> bool:
       session = session or utils.get_default_session()
       url = 'https://atcoder.jp/contests/dummydummydummy/submit'
+      logger.info(utils.NETWORK + f'GET: {url}')
       response = session.get(url)
       if response.status_code == 404:
          return True
@@ -100,7 +92,7 @@ class AtCoderService(Service):
          if name:
             users.append(name)
          else:
-            logger.info(utils.FAILURE_ICON + 'users not found.')
+            logger.info(utils.FAILURE + 'users not found.')
             sys.exit(0)
 
       conditions = []
