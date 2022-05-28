@@ -1,7 +1,9 @@
 import pathlib
 import contextlib
+import sys
 import appdirs
 import requests
+import datetime
 from logging import getLogger
 from typing import *
 import http
@@ -17,41 +19,53 @@ DEFAULT_COOKIE_PATH = USER_DATA_PATH / 'cookie.jar'
 def get_cookie_path(service: service.Service):
    return USER_DATA_PATH / service.get_name() / 'cookie.jar'
 
-CHECK_ICON = '[' + Fore.MAGENTA + 'v' + Style.RESET_ALL + ']'
-ADD_ICON = '[' + Fore.GREEN + '+' + Style.RESET_ALL + ']'
-DISPLAY_ICON = '[' + Fore.GREEN + '*' + Style.RESET_ALL + ']'
-FAILURE_ICON = '[' + Fore.RED + 'x' + Style.RESET_ALL + ']'
-HINT_ICON = '[' + Fore.YELLOW + '?' + Style.RESET_ALL + ']'
-INPUT_ICON = '[' + Fore.GREEN + '>' + Style.RESET_ALL + ']'
-SUCCESS_ICON = '[' + Fore.BLUE + 'o' + Style.RESET_ALL + ']'
+CHECK = 'CHECK: '
+ADD = 'ADD: '
+NETWORK = 'NETWORK: '
+DISPLAY = 'DISPLAY: '
+FAILURE = 'FAILURE: '
+HINT = 'HINT: '
+INPUT = 'INPUT: '
+SUCCESS = 'SUCCESS: '
+INPUT_ICON = '[' + Fore.YELLOW + '>' + Style.RESET_ALL + '] '
 
 def foreRGB(r: int, g: int, b: int) -> str:
-   return "\x1b[38;2;" + str(r) + ";" + str(g) + ";" + str(b) + "m"
+   r = '{:03}'.format(r)
+   g = '{:03}'.format(g)
+   b = '{:03}'.format(b)
+   return "\x1b[38;2;" + r + ";" + g + ";" + b + "m"
 
 def backRGB(r: int, g: int, b: int) -> str:
-   return "\x1b[48;2;" + str(r) + ";" + str(g) + ";" + str(b) + "m"
+   r = '{:03}'.format(r)
+   g = '{:03}'.format(g)
+   b = '{:03}'.format(b)
+   return "\x1b[48;2;" + r + ";" + g + ";" + b + "m"
+
+def convert_timestamp_with_time_zone_to_date(timestamp: str) -> str:
+   date = datetime.datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S%z')
+   return date.strftime('%Y-%m-%d %H:%M:%S')
 
 @contextlib.contextmanager
 def new_session_with_our_user_agent(cookie_path: pathlib.Path, service: service.Service=None) -> Iterator[requests.Session]:
    if service is not None:
       cookie_path = get_cookie_path(service)
-   print('Cookie Path =', cookie_path)
    session = requests.Session()
    session.headers['User-Agent'] = f'{version.__package_name__}/{version.__version__} (+{version.__url__})'
    logger.debug(f'User-Agent: {session.headers["User-Agent"]}')
    try:
       with utils.with_cookiejar(session, path=cookie_path) as session:
          yield session
-   except:
-      logger.info(utils.HINT_ICON + f' You can delete the broken cookie.jar file: {str(cookie_path)}')
+   except Exception as e:
+      logger.info(utils.HINT + f'You can delete the broken cookie.jar file: {str(cookie_path)}')
       raise
 
-def service_name_from_url(url: str) -> str:
+def service_from_url(url: str) -> service.Service:
    """コンテストURLからサービスを取得
    """
-   if url in 'atcoder':
+   if 'atcoder' in url:
       return service.AtCoderService()
    else:
+      logger.info('service name could not be found.')
       return None
 
 _DEFAULT_SESSION = None
