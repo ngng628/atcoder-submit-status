@@ -67,7 +67,7 @@ class AtCoderService(Service):
    def is_logged_in(self, session: Optional[requests.Session] = None) -> bool:
       session = session or utils.get_default_session()
       url = 'https://atcoder.jp/contests/dummydummydummy/submit'
-      logger.info(utils.NETWORK + f'GET: {url}')
+      logger.debug(utils.NETWORK + f'GET: {url}')
       response = session.get(url)
       if response.status_code == 404:
          return True
