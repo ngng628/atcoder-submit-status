@@ -1,6 +1,7 @@
 import argparse
 import sys
-import sys
+import codecs
+import pathlib
 import time
 from typing import Optional
 import requests
@@ -14,12 +15,14 @@ logger = getLogger(__name__)
 
 def add_subparser(subparsers: argparse.Action) -> None:
    subparsers_add_parser: Callable[..., argparse.ArgumentParser] = subparsers.add_parser  # type: ignore
-   subparser = subparsers_add_parser('watch', aliases=['w'], help='watch the contest submissions', formatter_class=  argparse.RawTextHelpFormatter, epilog='''\
+   subparser = subparsers_add_parser('fetch', aliases=['f'], help='Fetch the contest submissions', formatter_class=  argparse.RawTextHelpFormatter, epilog='''\
 Supported Services:
   √ AtCoder
 ''')
    subparser.add_argument('url', help='Contest URL')
-   subparser.add_argument('--no-color', action='store_true', help='Turn off color')
+   subparser.add_argument('-o', '--output-path',  metavar='<file>', type=pathlib.Path, help='Place the output into <file>.')
+   subparser.add_argument('-S', '--separator', metavar='<sep>', type=str, default=',', help='Use <sep> instead of `,` for field separator.')
+   subparser.add_argument('-e', '--encoding', metavar='<enc>', type=str, default='utf-8', help='Select charactor encoding.')
    subparser.add_argument('--tasks', metavar='<task-name>', default=[], nargs='*', help='Select tasks.\n(e.g. a b d ex)')
    subparser.add_argument('--languages', metavar='<lang>', default=[], nargs='*', help='Select languages.\n(e.g. C++ C#)')
    subparser.add_argument('--statuses', default=[], nargs='*', choices=['AC', 'CE', 'MLE', 'TLE', 'RE', 'OLE', 'IE', 'WA', 'WR'], help='Select statuses.\n(e.g. WA TLE)')
@@ -35,10 +38,12 @@ def _fetch(args: argparse.Namespace, service: service.Service, session: Optional
       submissions = service.minimize_submissions_info(submissions, args.info_level)
    return submissions
 
-def _draw(args: argparse.Namespace, drawableSubmissions):
+def _draw(args: argparse.Namespace, service: service.Service, submissions):
    print('\x1b[J', end='')
-   for s in drawableSubmissions:
-      print(s)
+   for s in submissions[-args.tail:]:
+      disp = ' │ '.join(it for it in s.values())
+      print(disp)
+
 
 def run(args: argparse.Namespace) -> bool:
    logger.debug(f'users: {args.users}')
@@ -53,24 +58,22 @@ def run(args: argparse.Namespace) -> bool:
          logger.info(utils.FAILURE + 'You are not signed in.')
          logger.info(utils.HINT + 'You can try to enter this command: `acss login URL`')
          return False
+      
+      sep = codecs.decode(args.separator, 'unicode-escape')
 
-      old_submissions = service.make_drawable_submissions(_fetch(args, service=service, session=session)[-args.tail:], args.no_color)
-      if args.reverse:
-         old_submissions.reverse()
-      _draw(args, drawableSubmissions=old_submissions)
       try:
-         while True:
-            time.sleep(1)
+         submissions = _fetch(args, service=service, session=session)
+         file = sys.stdout if args.output_path is None else codecs.open(str(args.output_path), mode='w', encoding=args.encoding)
+         for s in submissions:
+            for i, v in enumerate(s.values()):
+               if i != 0:
+                  print(end=sep, file=file)
+               print(v, end='', file=file)
+            print(file=file)
 
-            submissions = service.make_drawable_submissions(_fetch(args, service=service, session=session)[-args.tail:], args.no_color)
-            if args.reverse:
-               submissions.reverse()
+         if args.output_path:
+            logger.info(utils.SUCCESS + f'Write submissions to `{str(args.output_path)}`.')
+         
 
-            # TODO: カーソル移動のところをいい感じに書く
-            if old_submissions != submissions:
-               n = len(old_submissions)
-               print('\x1b[' + str(n) + 'F', end='')
-               _draw(args, drawableSubmissions=submissions)
-               old_submissions = submissions
       except KeyboardInterrupt:
          sys.exit(0)

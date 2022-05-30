@@ -55,12 +55,13 @@ $ acss watch https://atcoder.jp/contests/abc252  # 具体例
 |:-|:-|:-|
 | `-h, --help` | ヘルプを表示します。 | `acss watch -h` |
 | `--no-color` | 色付きの出力をオフにします。 | `acss watch URL --no-color` |
-| `-r, --reverse` | 提出を逆順に表示します。 | `acss watch URL -r` |
 | `--tasks` | 問題で絞り込みます。 | `acss watch URL --task a b ex` |
 | `--languages` | 言語で絞り込みます。 | `acss watch URL --languages C++ C#` |
 | `--statuses` | ジャッジの状態で絞り込みます 。| `acss watch URL --statuses WA TLE RE` |
 | `-u, --users`| ユーザ名で絞り込みます。 | `acss watch URL -u user1 user2` |
 | `--info-level` | 提出の情報の詳しさを設定します。（`MINIMAL, NORMAL, DETAILS` の3段階） | `acss watch URL --info-level MINIMAL` |
+| `-r, --reverse` | 提出を逆順に表示します。 | `acss watch URL -r` |
+| `-t, --tail` | 全提出のうち指定した数だけ出力します。 | `acss watch URL -t 5` |
 
 ### 提出一覧の保存
 
@@ -79,13 +80,14 @@ $ acss fetch URL -o result.csv  # result.csvとして保存
 |:-|:-|:-|
 | `-h, --help` | ヘルプを表示します。 | `acss fetch -h` |
 | `-o` | 結果の出力先を指定します。 | `acss fetch URL -o result.csv` |
-| `-s, --separator` | 区切り文字を変更します。 | `acss fetch URL -s '\t' -o result.tsv` |
-| `-r, --reverse` | 提出を逆順に表示します。 | `acss fetch URL -r` |
+| `-S, --separator` | 区切り文字を変更します。 | `acss fetch URL -s '\t' -o result.tsv` |
+| `-e, --encoding` | 文字コードを変更します。 | `acss fetch URL -e 'sjis' -o result.tsv` |
 | `--tasks` | 問題で絞り込みます。 | `acss fetch URL --task a b ex` |
 | `--languages` | 言語で絞り込みます。 | `acss fetch URL --languages C++ C#` |
 | `--statuses` | ジャッジの状態で絞り込みます 。| `acss fetch URL --statuses WA TLE RE` |
 | `-u, --users`| ユーザ名で絞り込みます。 | `acss fetch URL -u user1 user2` |
 | `--info-level` | 提出の情報の詳しさを設定します。（`MINIMAL, NORMAL, DETAILS` の3段階） | `acss fetch URL --info-level MINIMAL` |
+| `-t, --tail` | 全提出のうち指定した数だけ出力します。 | `acss fetch URL -t 5` |
 
 
 ## インストール

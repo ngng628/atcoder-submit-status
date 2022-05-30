@@ -45,6 +45,9 @@ def convert_timestamp_with_time_zone_to_date(timestamp: str) -> str:
    date = datetime.datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S%z')
    return date.strftime('%Y-%m-%d %H:%M:%S')
 
+def convert_language_with_version_to_language(lang: str) -> str:
+   return lang[:lang.find(' ')]
+
 @contextlib.contextmanager
 def new_session_with_our_user_agent(cookie_path: pathlib.Path, service: service.Service=None) -> Iterator[requests.Session]:
    if service is not None:
