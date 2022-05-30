@@ -80,6 +80,13 @@ class AtCoderService(Service):
       contest_round = self.get_round(url)
       submissions_url = self.get_url() + '/contests/' + contest_round + '/submissions'
 
+      # 全体の提出を見る権限があるかを確認
+      response = session.get(submissions_url)
+      logger.debug(f'status_code = {response.status_code}')
+      logger.debug(f'type(status_code) = {type(response.status_code)}')
+      if response.status_code == 404:
+         submissions_url += '/me'
+
       # フィルタ用データの調整
       if not tasks:
          tasks.append(None)
@@ -106,8 +113,11 @@ class AtCoderService(Service):
       keys = self._get_all_headers()
       max_lengths = { key: 0 for key in keys }
       for task, language, status, user in conditions:
-         page = 1
+         page = 0
          while True:  # page がなくなるまで
+            page += 1
+            time.sleep(0.5)
+
             payload = { 'page': page }
             if task:
                if contest_round[:3] == 'ABC' and task == 'ex':
@@ -121,6 +131,7 @@ class AtCoderService(Service):
                payload['f.User'] = user
             response = session.get(submissions_url, params=payload)
             response.raise_for_status()
+
             soup = BeautifulSoup(response.text, 'lxml')
             
             tables = soup.findAll('table', { 'class': 'table' }) 
@@ -155,8 +166,6 @@ class AtCoderService(Service):
                submissions.append(submission)
                for key in keys:
                   max_lengths[key] = max(max_lengths[key], len(submission[key]))
-            time.sleep(0.5)
-            page += 1
 
       submissions = sorted(submissions, key=lambda x: datetime.strptime(x['submission_time'], '%Y-%m-%d %H:%M:%S'), reverse=True)
       # 問題名の一覧を取得して十分な幅を確保する
