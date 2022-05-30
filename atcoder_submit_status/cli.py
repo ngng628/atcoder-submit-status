@@ -1,5 +1,5 @@
 import argparse
-from ast import parse
+from ast import arg, parse
 from distutils.log import ERROR
 from email.errors import HeaderParseError
 import sys
@@ -11,6 +11,7 @@ import atcoder_submit_status.utils as utils
 import atcoder_submit_status.login as subcommands_login
 import atcoder_submit_status.logout as subcommands_logout
 import atcoder_submit_status.watch as subcommands_watch
+import atcoder_submit_status.fetch as subcommands_fetch
 import atcoder_submit_status.log_formatter as log_formatter
 
 logger = getLogger(__name__)
@@ -37,6 +38,7 @@ Tips:
    subcommands_login.add_subparser(subparsers)
    subcommands_logout.add_subparser(subparsers)
    subcommands_watch.add_subparser(subparsers)
+   subcommands_fetch.add_subparser(subparsers)
 
    return parser
 
@@ -56,6 +58,9 @@ def run_program(args: argparse.Namespace, parser: argparse.ArgumentParser) -> in
          return 1
    elif args.subcommand in ['watch', 'w']:
       if not subcommands_watch.run(args):
+         return 1
+   elif args.subcommand in ['fetch', 'f']:
+      if not subcommands_fetch.run(args):
          return 1
    else:
       parser.print_help(file=sys.stderr)
