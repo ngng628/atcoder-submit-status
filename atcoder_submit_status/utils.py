@@ -41,12 +41,21 @@ def backRGB(r: int, g: int, b: int) -> str:
    b = '{:03}'.format(b)
    return "\x1b[48;2;" + r + ";" + g + ";" + b + "m"
 
+def delete_lines(n_lines: int):
+   if n_lines == 0:
+      return
+   print(f'\x1b[' + str(n_lines) + 'F\x1b[J', end='', flush=True)
+
 def convert_timestamp_with_time_zone_to_date(timestamp: str) -> str:
    date = datetime.datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S%z')
    return date.strftime('%Y-%m-%d %H:%M:%S')
 
 def convert_language_with_version_to_language(lang: str) -> str:
    return lang[:lang.find(' ')]
+
+def get_task_id(full_task_name: str) -> str:
+   return full_task_name[:full_task_name.find(' ')]
+
 
 @contextlib.contextmanager
 def new_session_with_our_user_agent(cookie_path: pathlib.Path, service: service.Service=None) -> Iterator[requests.Session]:
@@ -87,7 +96,7 @@ def with_cookiejar(session: requests.Session, *, path: pathlib.Path=DEFAULT_COOK
       logger.info('load cookie from: %s', path)
       session.cookies.load(ignore_discard=True)  # type: ignore
    yield session
-   logger.info('save cookie to: %s', path)
+   logger.debug('save cookie to: %s', path)
    path.parent.mkdir(parents=True, exist_ok=True)
    session.cookies.save(ignore_discard=True)  # type: ignore
    path.chmod(0o600)  # NOTE: to make secure a little bit

@@ -92,10 +92,6 @@ class AtCoderService(Service):
          submissions_url += '/me'
 
       # フィルタ用データの調整
-      if not tasks:
-         tasks.append(None)
-      if not statuses:
-         statuses.append(None)
       if not users:
          name = self._get_user_name()
          if name:
@@ -104,27 +100,15 @@ class AtCoderService(Service):
             logger.info(utils.FAILURE + 'users not found.')
             sys.exit(0)
 
-      conditions = []
-      for task in tasks:
-         for status in statuses:
-            for user in users:
-               conditions.append((task, status, user))
-
       submissions = []
       keys = self._get_all_headers()
-      for task, status, user in conditions:
+      for user in users:
          page = 0
          while True:  # page がなくなるまで
             page += 1
             time.sleep(0.25)
 
             payload = { 'page': page }
-            if task:
-               if contest_round[:3] == 'ABC' and task == 'ex':
-                  task = 'h'
-               payload['f.Task'] = f'{contest_round}_{task}'
-            if status:
-               payload['f.Status'] = status
             if user:
                payload['f.User'] = user
             response = session.get(submissions_url, params=payload)
@@ -153,13 +137,14 @@ class AtCoderService(Service):
                # データを整形する
                submission['submission_time'] = utils.convert_timestamp_with_time_zone_to_date(submission['submission_time'])
 
-               # 欲しい
-               if not languages or utils.convert_language_with_version_to_language(submission['language']) in languages:
-                  submissions.append(submission)
+               # フィルター
+               if not tasks or utils.get_task_id(submission['task']).lower() in [t.lower() for t in tasks]:
+                  if not statuses or submission['status'] in statuses or sum(int(submission['status'] not in self._get_statuses() and s == 'WJ') for s in statuses) != 0:
+                     if not languages or utils.convert_language_with_version_to_language(submission['language']) in languages:
+                        submissions.append(submission)
 
-      submissions = sorted(submissions, key=lambda x: datetime.strptime(x['submission_time'], '%Y-%m-%d %H:%M:%S'), reverse=True)
+      submissions = sorted(submissions, key=lambda x: datetime.strptime(x['submission_time'], '%Y-%m-%d %H:%M:%S'))
 
-      submissions.reverse()
       return submissions
 
    def minimize_submissions_info(self, submissions, mode):
@@ -169,9 +154,7 @@ class AtCoderService(Service):
             if mode == 'MINIMAL':
                res[i].pop('submission_time')
          if 'task' in res[i]:
-            tmp = res[i]['task']
-            tmp = tmp[:tmp.find(' ')]
-            res[i]['task'] = tmp
+            res[i]['task'] = utils.get_task_id(res[i]['task'])
          if 'language' in res[i]:
             if mode == 'MINIMAL':
                res[i].pop('language')

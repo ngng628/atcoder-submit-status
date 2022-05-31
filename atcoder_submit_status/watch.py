@@ -1,4 +1,5 @@
 import argparse
+from copy import deepcopy
 import sys
 import sys
 import time
@@ -22,7 +23,7 @@ Supported Services:
    subparser.add_argument('--no-color', action='store_true', help='Turn off color')
    subparser.add_argument('--tasks', metavar='<task-name>', default=[], nargs='*', help='Select tasks.\n(e.g. a b d ex)')
    subparser.add_argument('--languages', metavar='<lang>', default=[], nargs='*', help='Select languages.\n(e.g. C++ C#)')
-   subparser.add_argument('--statuses', default=[], nargs='*', choices=['AC', 'CE', 'MLE', 'TLE', 'RE', 'OLE', 'IE', 'WA', 'WR'], help='Select statuses.\n(e.g. WA TLE)')
+   subparser.add_argument('--statuses', default=[], nargs='*', choices=['AC', 'CE', 'MLE', 'TLE', 'RE', 'OLE', 'IE', 'WA', 'WJ', 'WR'], help='Select statuses.\n(e.g. WA TLE)')
    subparser.add_argument('-u', '--users', metavar='<user-name>', default=[], nargs='*', help='Select users.')
    subparser.add_argument('--info-level', default='NORMAL', choices=['MINIMAL', 'NORMAL', 'DETAILS'], help='Select output information level.')
    subparser.add_argument('-r', '--reverse', action='store_true', help='Reverse submissions')
@@ -35,8 +36,7 @@ def _fetch(args: argparse.Namespace, service: service.Service, session: Optional
       submissions = service.minimize_submissions_info(submissions, args.info_level)
    return submissions
 
-def _draw(args: argparse.Namespace, drawableSubmissions):
-   print('\x1b[J', end='')
+def _draw(drawableSubmissions):
    for s in drawableSubmissions:
       print(s)
 
@@ -54,23 +54,15 @@ def run(args: argparse.Namespace) -> bool:
          logger.info(utils.HINT + 'You can try to enter this command: `acss login URL`')
          return False
 
-      old_submissions = service.make_drawable_submissions(_fetch(args, service=service, session=session)[-args.tail:], args.no_color)
-      if args.reverse:
-         old_submissions.reverse()
-      _draw(args, drawableSubmissions=old_submissions)
+      submissions = []
       try:
          while True:
-            time.sleep(1)
-
+            n = len(submissions)
+            utils.delete_lines(n_lines=n)
             submissions = service.make_drawable_submissions(_fetch(args, service=service, session=session)[-args.tail:], args.no_color)
             if args.reverse:
                submissions.reverse()
-
-            # TODO: カーソル移動のところをいい感じに書く
-            if old_submissions != submissions:
-               n = len(old_submissions)
-               print('\x1b[' + str(n) + 'F', end='')
-               _draw(args, drawableSubmissions=submissions)
-               old_submissions = submissions
+            _draw(drawableSubmissions=submissions)
+            time.sleep(1)
       except KeyboardInterrupt:
          sys.exit(0)

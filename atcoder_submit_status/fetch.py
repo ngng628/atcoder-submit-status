@@ -25,7 +25,7 @@ Supported Services:
    subparser.add_argument('-e', '--encoding', metavar='<enc>', type=str, default='utf-8', help='Select charactor encoding.')
    subparser.add_argument('--tasks', metavar='<task-name>', default=[], nargs='*', help='Select tasks.\n(e.g. a b d ex)')
    subparser.add_argument('--languages', metavar='<lang>', default=[], nargs='*', help='Select languages.\n(e.g. C++ C#)')
-   subparser.add_argument('--statuses', default=[], nargs='*', choices=['AC', 'CE', 'MLE', 'TLE', 'RE', 'OLE', 'IE', 'WA', 'WR'], help='Select statuses.\n(e.g. WA TLE)')
+   subparser.add_argument('--statuses', default=[], nargs='*', choices=['AC', 'CE', 'MLE', 'TLE', 'RE', 'OLE', 'IE', 'WA', 'WJ', 'WR'], help='Select statuses.\n(e.g. WA TLE)')
    subparser.add_argument('-u', '--users', metavar='<user-name>', default=[], nargs='*', help='Select users.')
    subparser.add_argument('--info-level', default='NORMAL', choices=['MINIMAL', 'NORMAL', 'DETAILS'], help='Select output information level.')
    subparser.add_argument('-r', '--reverse', action='store_true', help='Reverse submissions')
