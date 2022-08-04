@@ -42,9 +42,8 @@ def backRGB(r: int, g: int, b: int) -> str:
    return "\x1b[48;2;" + r + ";" + g + ";" + b + "m"
 
 def delete_lines(n_lines: int):
-   if n_lines == 0:
-      return
-   print(f'\x1b[' + str(n_lines) + 'F\x1b[J', end='', flush=True)
+   for _ in range(n_lines):
+      print(f'\x1b[1T', end='')
 
 def convert_timestamp_with_time_zone_to_date(timestamp: str) -> str:
    date = datetime.datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S%z')

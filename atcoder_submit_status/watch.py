@@ -38,7 +38,8 @@ def _fetch(args: argparse.Namespace, service: service.Service, session: Optional
 
 def _draw(drawableSubmissions):
    for s in drawableSubmissions:
-      print(s)
+      print(s + '\x1b[K')
+   print('\x1b[J', end='')
 
 def run(args: argparse.Namespace) -> bool:
    logger.debug(f'users: {args.users}')
@@ -58,7 +59,7 @@ def run(args: argparse.Namespace) -> bool:
       try:
          while True:
             n = len(submissions)
-            utils.delete_lines(n_lines=n)
+            utils.delete_lines(n)
             submissions = service.make_drawable_submissions(_fetch(args, service=service, session=session)[-args.tail:], args.no_color)
             if args.reverse:
                submissions.reverse()
