@@ -6,7 +6,9 @@ import time
 from typing import Optional
 import requests
 from logging import getLogger
-from colorama import Fore, Back, Style
+from colorama import Fore, Back, Style, Cursor
+from rich.console import Console
+from rich.live import Live
 
 import atcoder_submit_status.utils as utils
 import atcoder_submit_status.service as service
@@ -29,6 +31,7 @@ Supported Services:
    subparser.add_argument('-r', '--reverse', action='store_true', help='Reverse submissions')
    subparser.add_argument('-t', '--tail', metavar='<n-lines>', default=sys.maxsize, type=int, help='Print the last <n-lines> submissions.')
 
+
 def _fetch(args: argparse.Namespace, service: service.Service, session: Optional[requests.Session] = None):
    session = session or utils.get_default_session()
    submissions = service.fetch_submissions(args.url, tasks=args.tasks, languages=args.languages, statuses=args.statuses, users=args.users, session=session)
@@ -36,10 +39,6 @@ def _fetch(args: argparse.Namespace, service: service.Service, session: Optional
       submissions = service.minimize_submissions_info(submissions, args.info_level)
    return submissions
 
-def _draw(drawableSubmissions):
-   for s in drawableSubmissions:
-      print(s + '\x1b[K')
-   print('\x1b[J', end='')
 
 def run(args: argparse.Namespace) -> bool:
    logger.debug(f'users: {args.users}')
@@ -57,13 +56,12 @@ def run(args: argparse.Namespace) -> bool:
 
       submissions = []
       try:
-         while True:
-            n = len(submissions)
-            utils.delete_lines(n)
-            submissions = service.make_drawable_submissions(_fetch(args, service=service, session=session)[-args.tail:], args.no_color)
-            if args.reverse:
-               submissions.reverse()
-            _draw(drawableSubmissions=submissions)
-            time.sleep(1)
+         with Live(refresh_per_second=1) as live:
+            while True:
+               submissions = service.make_drawable_submissions(_fetch(args, service=service, session=session)[-args.tail:], args.no_color)
+               if args.reverse:
+                  submissions.reverse()
+               live.update(submissions)
+               time.sleep(1)
       except KeyboardInterrupt:
          sys.exit(0)
