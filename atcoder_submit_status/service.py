@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 from colorama import Fore, Back, Style
 import atcoder_submit_status.__about__ as version
 import atcoder_submit_status.utils as utils
+from rich.table import Table
 from logging import getLogger
 logger = getLogger(__name__)
 
@@ -19,41 +20,51 @@ class Service:
    def get_login_page_url(self) -> str:
       pass
 
+
    @abstractmethod
    def login(self, username, password, session):
       pass
+
 
    @abstractmethod
    def is_logged_in(self) -> bool:
       pass
 
+
    @abstractmethod
    def fetch_submissions(self, url, tasks, languages, statuses, users, session):
       pass
+
 
    @abstractmethod
    def minimize_submissions_info(self, submissions, mode):
       pass
 
+
    @abstractmethod
    def make_drawable_submissions(self, submissions, no_color):
       pass
+
 
    @abstractmethod
    def get_tasks(self, tasks_url, session: Optional[requests.Session] = None):
       pass
 
+
    @abstractmethod
    def get_url(self) -> str:
       pass
+
 
    @abstractmethod
    def get_name(self) -> str:
       pass
 
+
 class AtCoderService(Service):
    def get_login_page_url(self) -> str:
       return 'https://atcoder.jp/login'
+
 
    def login(self, username: str, password: str, session: Optional[requests.Session] = None):
       session = session or utils.get_default_session()
@@ -68,6 +79,7 @@ class AtCoderService(Service):
       response = session.post(url, data=login_info)
       response.raise_for_status()
 
+
    def is_logged_in(self, session: Optional[requests.Session] = None) -> bool:
       session = session or utils.get_default_session()
       url = 'https://atcoder.jp/contests/dummydummydummy/submit'
@@ -77,7 +89,8 @@ class AtCoderService(Service):
          return True
       else:
          return False
-   
+
+
    def fetch_submissions(self, url: str, tasks: List[str] = [], languages: List[str] = [], statuses: List[str] = [], users: List[str] = [], session: Optional[requests.Session] = None):
       session = session or utils.get_default_session()
 
@@ -169,40 +182,40 @@ class AtCoderService(Service):
 
       return res
 
+
    def make_drawable_submissions(self, submissions, no_color: bool):
       submits = deepcopy(submissions)
 
       # Statusには色をつけておく
+      from rich.padding import Padding
       for i in range(len(submits)):
          status = submits[i]['status'][-3:].strip()
          if not no_color:
-            color = self._get_status_color(status) + utils.foreRGB(255, 255, 255)
-            submits[i]['status'] = Style.RESET_ALL + color + ' ' + submits[i]['status'] + ' ' + Style.RESET_ALL
+            color = self._get_status_color(status)
+            submits[i]['status'] = Padding(submits[i]['status'], (0, 1), style=color)
 
-      # 十分な余白を取るために、表示幅を前計算
-      headers = self._get_all_headers()
-      widths = { k: 0 for k in headers }
+      # Tableを構築する
+      table = Table()
+
+      if len(submits) == 0:
+         return table
+
+      ## カラムの定義
+      for key in submits[0].keys():
+         if key in ['score', 'code_size', 'exec_time', 'memory']:
+            table.add_column(key, justify='right')
+         elif key in ['status']:
+            table.add_column(key, justify='center')
+         else:
+            table.add_column(key, justify='left')
+
+      ## ラインの定義
       for submit in submits:
-         for header in headers:
-            if header in submit:
-               widths[header] = max(widths[header], len(str(submit[header])))
+         row = [val for val in submit.values()]
+         table.add_row(*row)
 
-      # 実際に幅を揃える
-      for submit in submits:
-         for key in headers:
-            if key in submit:
-               if key in ['score', 'code_size', 'exec_time', 'memory']:
-                  submit[key] = submit[key].rjust(widths[key])
-               elif key in ['status']:
-                  submit[key] = submit[key].center(widths[key])
-               else:
-                  submit[key] = submit[key].ljust(widths[key])
+      return table
 
-      # 結合する
-      for i in range(len(submits)):
-         submits[i] = ' | '.join(s for s in submits[i].values())
-      
-      return submits
 
    def get_task_names(self, tasks_url, session: Optional[requests.Session] = None) -> List[str]:
       session = session or utils.get_default_session()
@@ -221,11 +234,14 @@ class AtCoderService(Service):
 
       return task_names
 
+
    def get_url(self):
       return 'https://atcoder.jp'
-   
+
+
    def get_name(self):
       return 'AtCoder'
+
 
    # TODO: きれいに書く
    def get_round(self, url: str) -> str:
@@ -234,7 +250,8 @@ class AtCoderService(Service):
          url = url + '/'
       res = url[prefix_len:url.find('/', prefix_len)]
       return res
-   
+
+
 # private
    def _get_user_name(self) -> str:
       with open(utils.get_cookie_path(self)) as f:
@@ -245,19 +262,22 @@ class AtCoderService(Service):
          else:
             return None
 
+
    def _get_all_headers(self) -> List[str]:
       return ['submission_time', 'task', 'user', 'language', 'score', 'code_size', 'status', 'exec_time', 'memory']
 
+
    def _get_statuses(self) -> List[str]:
       return ['AC', 'CE', 'MLE', 'TLE', 'RE', 'OLE', 'IE', 'WA', 'WJ', 'WR']
+
 
    def _get_status_color(self, status: str):
       green = ['AC']
       yellow = ['CE', 'MLE', 'TLE', 'RE', 'OLE', 'IE', 'WA']
       gray_status = ['WJ', 'WR']
       if status in green:
-         return utils.backRGB(92, 184, 92)
+         return 'rgb(255,255,255) on rgb(92,184,92)'
       elif status in yellow:
-         return utils.backRGB(240, 173, 78)
+         return 'rgb(255,255,255) on rgb(240,173,78)'
       else:
-         return utils.backRGB(153, 153, 153)
+         return 'rgb(255,255,255) on rgb(153,153,153)'

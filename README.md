@@ -5,6 +5,8 @@
 
 ## スクリーンショット
 
+![screenshot](screenshot/watch.png)
+
 ## 機能
 
 ### 基本
@@ -81,7 +83,7 @@ $ acss fetch URL -o result.csv  # result.csvとして保存
 | `-h, --help` | ヘルプを表示します。 | `acss fetch -h` |
 | `-o` | 結果の出力先を指定します。 | `acss fetch URL -o result.csv` |
 | `-S, --separator` | 区切り文字を変更します。 | `acss fetch URL -s '\t' -o result.tsv` |
-| `-e, --encoding` | 文字コードを変更します。 | `acss fetch URL -e 'sjis' -o result.tsv` |
+| `-e, --encoding` | 文字コードを変更します。 | `acss fetch URL -e 'sjis' -o result.csv` |
 | `--tasks` | 問題で絞り込みます。 | `acss fetch URL --task a b ex` |
 | `--languages` | 言語で絞り込みます。 | `acss fetch URL --languages C++ C#` |
 | `--statuses` | ジャッジの状態で絞り込みます 。| `acss fetch URL --statuses WA TLE RE` |
