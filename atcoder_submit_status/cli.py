@@ -21,7 +21,7 @@ def get_parser() -> argparse.ArgumentParser:
    """
 
    parser = argparse.ArgumentParser(
-      description='Tools for AtCoder Submissions',
+      description='Tools for Watching AtCoder Submissions',
       formatter_class=argparse.RawTextHelpFormatter,
       epilog='''\
 Tips:
