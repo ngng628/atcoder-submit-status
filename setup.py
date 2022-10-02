@@ -2,6 +2,9 @@ from setuptools import find_packages, setup
 
 import atcoder_submit_status.__about__ as version
 
+with open('README.md', 'r') as fp:
+    readme = fp.read()
+
 setup(
     name=version.__package_name__,
     version=version.__version__,
@@ -9,15 +12,15 @@ setup(
     author_email=version.__email__,
     url=version.__url__,
     license=version.__license__,
+    keywords="atcoder",
     description=version.__description__,
+    long_description=readme,
     python_requires='>=3.6',
-    install_requires=[
-      #   'colorama >= 0.3, < 1',
-    ],
+    install_requires=[name.rstrip() for name in open('requirements.txt').readlines()],
     packages=find_packages(exclude=('tests', 'docs')),
     entry_points={
         'console_scripts': [
-            'oj = atcoder_submit_status.main:main',
+            'acss = atcoder_submit_status.main:main',
         ],
     },
 )
