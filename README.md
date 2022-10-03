@@ -1,3 +1,7 @@
+![license](https://img.shields.io/github/license/ngng628/atcoder-submit-status)
+![release](https://img.shields.io/github/v/release/ngng628/atcoder-submit-status)
+![stars](https://img.shields.io/github/stars/ngng628/atcoder-submit-status?style=social)
+
 # atcoder-submit-status
 
 `acss` はコマンドライン上でAtCoderの提出状況を確認するためのCLIツールです。
