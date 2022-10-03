@@ -7,7 +7,7 @@ with open('README.md', 'r') as fp:
 
 setup(
     name=version.__package_name__,
-    version=version.__version__,
+    version='0.0.1',
     author=version.__author__,
     author_email=version.__email__,
     url=version.__url__,
@@ -17,7 +17,7 @@ setup(
     long_description=readme,
     python_requires='>=3.6',
     install_requires=[name.rstrip() for name in open('requirements.txt').readlines()],
-    packages=find_packages(exclude=('tests', 'docs')),
+    packages=find_packages(),
     entry_points={
         'console_scripts': [
             'acss = atcoder_submit_status.main:main',
