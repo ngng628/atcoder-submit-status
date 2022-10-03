@@ -7,7 +7,7 @@ with open('README.md', 'r') as fp:
 
 setup(
     name=version.__package_name__,
-    version='0.0.1',
+    version='0.0.2',
     author=version.__author__,
     author_email=version.__email__,
     url=version.__url__,

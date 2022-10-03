@@ -9,7 +9,13 @@
 
 ## スクリーンショット
 
-<img src="https://github.com/ngng628/atcoder-submit-status/blob/main/screenshot/watch.png?raw=true" alt="screenshot of acss command">
+<table>
+<tr>
+<td><img src="https://github.com/ngng628/atcoder-submit-status/blob/main/screenshot/watch.png?raw=true" alt="screenshot of acss command"></td>
+<td><img src="https://github.com/ngng628/atcoder-submit-status/blob/main/screenshot/info-level.png?raw=true" alt="screenshot of acss command"></td>
+</tr>
+</table>
+
 
 ## 機能
 
