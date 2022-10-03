@@ -5,7 +5,7 @@
 
 ## スクリーンショット
 
-![screenshot](screenshot/watch.png)
+<img src="https://github.com/ngng628/atcoder-submit-status/blob/main/screenshot/watch.png?raw=true" alt="screenshot of acss command">
 
 ## 機能
 
