@@ -58,7 +58,9 @@ $ acss logout atcoder
 
 ```shell
 $ acss watch URL
-$ acss watch https://atcoder.jp/contests/abc252  # 具体例
+$ 
+$ acss watch https://atcoder.jp/contests/abc252
+$ acss watch abc252  # url が https://atcoder.jp/contests/ 始まらない場合は、自動的に補完されます。
 ```
 
 以下のオプションがサポートされています。

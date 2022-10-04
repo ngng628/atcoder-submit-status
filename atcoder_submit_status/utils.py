@@ -71,7 +71,8 @@ def new_session_with_our_user_agent(cookie_path: pathlib.Path, service: service.
       raise
 
 def service_from_url(url: str) -> service.Service:
-   """コンテストURLからサービスを取得
+   """
+   コンテストURLからサービスを取得します。
    """
    if 'atcoder' in url:
       return service.AtCoderService()

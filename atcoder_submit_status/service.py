@@ -243,13 +243,20 @@ class AtCoderService(Service):
       return 'AtCoder'
 
 
-   # TODO: きれいに書く
    def get_round(self, url: str) -> str:
-      prefix_len = len('https://atcoder.jp/contests/')
-      if url[-1] != '/':
-         url = url + '/'
-      res = url[prefix_len:url.find('/', prefix_len)]
-      return res
+      """
+      コンテスト名を取得します。
+
+      url が 'https://atcoder.jp/contests/' で始まらないとき、url が round 名そのものであると解釈します。
+      """
+      prefix = 'https://atcoder.jp/contests/'
+
+      if url.startswith(prefix):
+         if url[-1] != '/':
+            url = url + '/'
+         return url[len(prefix):url.find('/', len(prefix))]
+      else:
+         return url
 
 
 # private

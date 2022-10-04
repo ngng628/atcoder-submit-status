@@ -32,24 +32,25 @@ Supported Services:
    subparser.add_argument('-t', '--tail', metavar='<n-lines>', default=sys.maxsize, type=int, help='Print the last <n-lines> submissions.')
 
 
-def _fetch(args: argparse.Namespace, service: service.Service, session: Optional[requests.Session] = None):
+def _fetch(args: argparse.Namespace, srv: service.Service, session: Optional[requests.Session] = None):
    session = session or utils.get_default_session()
-   submissions = service.fetch_submissions(args.url, tasks=args.tasks, languages=args.languages, statuses=args.statuses, users=args.users, session=session)
+   submissions = srv.fetch_submissions(args.url, tasks=args.tasks, languages=args.languages, statuses=args.statuses, users=args.users, session=session)
    if args.info_level != 'DETAILS':
-      submissions = service.minimize_submissions_info(submissions, args.info_level)
+      submissions = srv.minimize_submissions_info(submissions, args.info_level)
    return submissions
 
 
 def run(args: argparse.Namespace) -> bool:
    logger.debug(f'users: {args.users}')
-   service = utils.service_from_url(args.url)
+   srv = utils.service_from_url(args.url)
 
-   if service is None:
-      return False
+   if srv is None:
+      logger.info('we predict that the service you use is AtCoder.')
+      srv = service.AtCoderService()
 
-   with utils.new_session_with_our_user_agent(args.cookie, service=service) as session:
+   with utils.new_session_with_our_user_agent(args.cookie, service=srv) as session:
       logger.debug('start session')
-      if not service.is_logged_in(session):
+      if not srv.is_logged_in(session):
          logger.info(utils.FAILURE + 'You are not signed in.')
          logger.info(utils.HINT + 'You can try to enter this command: `acss login URL`')
          return False
@@ -58,7 +59,7 @@ def run(args: argparse.Namespace) -> bool:
       try:
          with Live(refresh_per_second=1) as live:
             while True:
-               submissions = service.make_drawable_submissions(_fetch(args, service=service, session=session)[-args.tail:], args.no_color)
+               submissions = srv.make_drawable_submissions(_fetch(args, srv=srv, session=session)[-args.tail:], args.no_color)
                if args.reverse:
                   submissions.reverse()
                live.update(submissions)
