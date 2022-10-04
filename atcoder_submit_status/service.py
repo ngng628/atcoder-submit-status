@@ -81,7 +81,7 @@ class AtCoderService(Service):
          response.raise_for_status()
       except requests.exceptions.HTTPError as e:
          logger.error(e)
-         exit()
+         sys.exit(0)
 
 
 
@@ -135,7 +135,7 @@ class AtCoderService(Service):
                response.raise_for_status()
             except requests.exceptions.HTTPError as e:
                logger.error(e)
-               exit()
+               sys.exit(0)
 
             soup = BeautifulSoup(response.text, 'lxml')
             
@@ -235,7 +235,7 @@ class AtCoderService(Service):
          response.raise_for_status()
       except requests.exceptions.HTTPError as e:
          logger.error(e)
-         exit()
+         sys.exit(0)
 
       soup = BeautifulSoup(response.text, 'lxml')
       rows = soup.findAll('table', {'class': 'table' })[0].findAll('tr')
