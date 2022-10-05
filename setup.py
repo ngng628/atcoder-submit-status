@@ -7,7 +7,7 @@ with open('README.md', 'r') as fp:
 
 setup(
     name=version.__package_name__,
-    version='0.0.2',
+    version='0.0.3',
     author=version.__author__,
     author_email=version.__email__,
     url=version.__url__,
@@ -23,4 +23,11 @@ setup(
             'acss = atcoder_submit_status.main:main',
         ],
     },
+    classifiers={
+        'Programming Language :: Python :: 3',
+        'Environment :: Console',
+        'Topic :: Internet :: WWW/HTTP',
+        'Topic :: Utilities',
+        'License :: OSI Approved :: MIT License'
+    }
 )
