@@ -95,3 +95,7 @@ def main(args: Optional[List[str]] = None) -> 'NoReturn':
    except Exception as e:
       logger.exception(str(e))
       sys.exit(1)
+
+
+if __name__ == '__main__':
+   main()

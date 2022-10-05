@@ -76,8 +76,13 @@ class AtCoderService(Service):
       soup = BeautifulSoup(response.text, 'lxml')
       csrf_token = soup.find(attrs={'name': 'csrf_token'}).get('value')
       login_info = { 'csrf_token': csrf_token, 'username': username, 'password': password }
-      response = session.post(url, data=login_info)
-      response.raise_for_status()
+      try:
+         response = session.post(url, data=login_info)
+         response.raise_for_status()
+      except requests.exceptions.HTTPError as e:
+         logger.error(e)
+         sys.exit(0)
+
 
 
    def is_logged_in(self, session: Optional[requests.Session] = None) -> bool:
@@ -124,8 +129,13 @@ class AtCoderService(Service):
             payload = { 'page': page }
             if user:
                payload['f.User'] = user
-            response = session.get(submissions_url, params=payload)
-            response.raise_for_status()
+
+            try:
+               response = session.get(submissions_url, params=payload)
+               response.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+               logger.error(e)
+               sys.exit(0)
 
             soup = BeautifulSoup(response.text, 'lxml')
             
@@ -219,8 +229,14 @@ class AtCoderService(Service):
 
    def get_task_names(self, tasks_url, session: Optional[requests.Session] = None) -> List[str]:
       session = session or utils.get_default_session()
-      response = session.get(tasks_url)
-      response.raise_for_status()
+
+      try:
+         response = session.get(tasks_url)
+         response.raise_for_status()
+      except requests.exceptions.HTTPError as e:
+         logger.error(e)
+         sys.exit(0)
+
       soup = BeautifulSoup(response.text, 'lxml')
       rows = soup.findAll('table', {'class': 'table' })[0].findAll('tr')
       
@@ -243,13 +259,20 @@ class AtCoderService(Service):
       return 'AtCoder'
 
 
-   # TODO: きれいに書く
    def get_round(self, url: str) -> str:
-      prefix_len = len('https://atcoder.jp/contests/')
-      if url[-1] != '/':
-         url = url + '/'
-      res = url[prefix_len:url.find('/', prefix_len)]
-      return res
+      """
+      コンテスト名を取得します。
+
+      url が 'https://atcoder.jp/contests/' で始まらないとき、url が round 名そのものであると解釈します。
+      """
+      prefix = 'https://atcoder.jp/contests/'
+
+      if url.startswith(prefix):
+         if url[-1] != '/':
+            url = url + '/'
+         return url[len(prefix):url.find('/', len(prefix))]
+      else:
+         return url
 
 
 # private

@@ -9,12 +9,7 @@
 
 ## スクリーンショット
 
-<table>
-<tr>
-<td><img src="https://github.com/ngng628/atcoder-submit-status/blob/main/screenshot/watch.png?raw=true" alt="screenshot of acss command"></td>
-<td><img src="https://github.com/ngng628/atcoder-submit-status/blob/main/screenshot/info-level.png?raw=true" alt="screenshot of acss command"></td>
-</tr>
-</table>
+<img src="https://github.com/ngng628/atcoder-submit-status/blob/main/screenshot/demo.gif?raw=true" alt="demo">
 
 
 ## 機能
@@ -24,7 +19,7 @@
 コマンドは以下の形式で与えます。
 
 ```shell
-$ acss [-h] [-v] [-c COOKIE] [-q] [--version] {login,l,logout,watch,w} 
+$ acss [-h] [-v] [-c COOKIE] [-q] [--version] {login,l,logout,watch,w,fetch,f} 
 ```
 
 |オプション|説明|
@@ -41,7 +36,7 @@ $ acss [-h] [-v] [-c COOKIE] [-q] [--version] {login,l,logout,watch,w}
 CLI上でユーザ名の入力とパスワードの入力が求められます。
 
 ```shell
-$ acss login atcoder
+$ acss login atcoder  # login は l に省略可能
 ```
 
 ### ログアウト
@@ -54,11 +49,20 @@ $ acss logout atcoder
 
 ### 提出一覧の確認
 
+<table>
+<tr>
+<td><img src="https://github.com/ngng628/atcoder-submit-status/blob/main/screenshot/watch.png?raw=true" alt="screenshot of acss command"></td>
+<td><img src="https://github.com/ngng628/atcoder-submit-status/blob/main/screenshot/info-level.png?raw=true" alt="screenshot of acss command"></td>
+</tr>
+</table>
+
 以下のコマンドで指定したコンテストの提出一覧を取得します。
 
 ```shell
-$ acss watch URL
-$ acss watch https://atcoder.jp/contests/abc252  # 具体例
+$ acss watch URL  # watch は w に省略可能
+$ 
+$ acss watch https://atcoder.jp/contests/abc252
+$ acss watch abc252  # url が https://atcoder.jp/contests/ 始まらない場合は、自動的に補完されます。
 ```
 
 以下のオプションがサポートされています。
@@ -82,8 +86,8 @@ $ acss watch https://atcoder.jp/contests/abc252  # 具体例
 そこで、提出一覧を保存する専用のコマンドを提供します。
 
 ```shell
-$ acss fetch URL  # そのまま標準出力に出力
-$ acss fetch URL -o result.csv  # result.csvとして保存
+$ acss fetch URL  # fetch は f に省略可能
+$ acss fetch URL -o result.csv  # result.csv に出力
 ```
 
 以下のオプションがサポートされています。

@@ -31,30 +31,26 @@ Supported Services:
    subparser.add_argument('-r', '--reverse', action='store_true', help='Reverse submissions')
    subparser.add_argument('-t', '--tail', metavar='<n-lines>', default=sys.maxsize, type=int, help='Print the last <n-lines> submissions.')
 
-def _fetch(args: argparse.Namespace, service: service.Service, session: Optional[requests.Session] = None):
-   session = session or utils.get_default_session()
-   submissions = service.fetch_submissions(args.url, tasks=args.tasks, languages=args.languages, statuses=args.statuses, users=args.users, session=session)
-   if args.info_level != 'DETAILS':
-      submissions = service.minimize_submissions_info(submissions, args.info_level)
-   return submissions
 
-def _draw(args: argparse.Namespace, service: service.Service, submissions):
-   print('\x1b[J', end='')
-   for s in submissions[-args.tail:]:
-      disp = ' │ '.join(it for it in s.values())
-      print(disp)
+def _fetch(args: argparse.Namespace, srv: service.Service, session: Optional[requests.Session] = None):
+   session = session or utils.get_default_session()
+   submissions = srv.fetch_submissions(args.url, tasks=args.tasks, languages=args.languages, statuses=args.statuses, users=args.users, session=session)
+   if args.info_level != 'DETAILS':
+      submissions = srv.minimize_submissions_info(submissions, args.info_level)
+   return submissions
 
 
 def run(args: argparse.Namespace) -> bool:
    logger.debug(f'users: {args.users}')
-   service = utils.service_from_url(args.url)
+   srv = utils.service_from_url(args.url)
 
-   if service is None:
-      return False
+   if srv is None:
+      logger.info('we predict that the service you use is AtCoder.')
+      srv = service.AtCoderService()
 
-   with utils.new_session_with_our_user_agent(args.cookie, service=service) as session:
+   with utils.new_session_with_our_user_agent(args.cookie, service=srv) as session:
       logger.debug('start session')
-      if not service.is_logged_in(session):
+      if not srv.is_logged_in(session):
          logger.info(utils.FAILURE + 'You are not signed in.')
          logger.info(utils.HINT + 'You can try to enter this command: `acss login URL`')
          return False
@@ -62,7 +58,7 @@ def run(args: argparse.Namespace) -> bool:
       sep = codecs.decode(args.separator, 'unicode-escape')
 
       try:
-         submissions = _fetch(args, service=service, session=session)
+         submissions = _fetch(args, srv=srv, session=session)
          file = sys.stdout if args.output_path is None else codecs.open(str(args.output_path), mode='w', encoding=args.encoding)
          for s in submissions:
             for i, v in enumerate(s.values()):
