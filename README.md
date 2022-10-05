@@ -62,7 +62,7 @@ $ acss logout atcoder
 $ acss watch URL  # watch は w に省略可能
 $ 
 $ acss watch https://atcoder.jp/contests/abc252
-$ acss watch abc252  # url が https://atcoder.jp/contests/ 始まらない場合は、自動的に補完されます。
+$ acss watch abc252  # url が https://atcoder.jp/contests/ で始まらない場合は、自動的に補完されます。
 ```
 
 以下のオプションがサポートされています。
