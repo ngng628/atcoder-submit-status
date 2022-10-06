@@ -256,7 +256,7 @@ class AtCoderService(Service):
 
 
    def get_name(self):
-      return 'AtCoder'
+      return 'atcoder'
 
 
    def get_round(self, url: str) -> str:
