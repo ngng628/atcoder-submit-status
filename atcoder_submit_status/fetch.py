@@ -19,7 +19,7 @@ def add_subparser(subparsers: argparse.Action) -> None:
 Supported Services:
   √ AtCoder
 ''')
-   subparser.add_argument('url', help='Contest URL')
+   subparser.add_argument('url', help='Contest URL (or AtCoder contest name)')
    subparser.add_argument('-o', '--output-path',  metavar='<file>', type=pathlib.Path, help='Place the output into <file>.')
    subparser.add_argument('-S', '--separator', metavar='<sep>', type=str, default=',', help='Use <sep> instead of `,` for field separator.')
    subparser.add_argument('-e', '--encoding', metavar='<enc>', type=str, default='utf-8', help='Select charactor encoding.')
@@ -52,7 +52,7 @@ def run(args: argparse.Namespace) -> bool:
       logger.debug('start session')
       if not srv.is_logged_in(session):
          logger.info(utils.FAILURE + 'You are not signed in.')
-         logger.info(utils.HINT + 'You can try to enter this command: `acss login URL`')
+         logger.info(utils.HINT + 'You can try to enter this command: `acss login {atcoder}`')
          return False
       
       sep = codecs.decode(args.separator, 'unicode-escape')

@@ -21,7 +21,7 @@ def add_subparser(subparsers: argparse.Action) -> None:
 Supported Services:
   √ AtCoder
 ''')
-   subparser.add_argument('url', help='Contest URL')
+   subparser.add_argument('url', help='Contest URL (or AtCoder contest name)')
    subparser.add_argument('--no-color', action='store_true', help='Turn off color')
    subparser.add_argument('--tasks', metavar='<task-name>', default=[], nargs='*', help='Select tasks.\n(e.g. a b d ex)')
    subparser.add_argument('--languages', metavar='<lang>', default=[], nargs='*', help='Select languages.\n(e.g. C++ C#)')
@@ -52,7 +52,7 @@ def run(args: argparse.Namespace) -> bool:
       logger.debug('start session')
       if not srv.is_logged_in(session):
          logger.info(utils.FAILURE + 'You are not signed in.')
-         logger.info(utils.HINT + 'You can try to enter this command: `acss login URL`')
+         logger.info(utils.HINT + 'You can try to enter this command: `acss login {atcoder}`')
          return False
 
       submissions = []
