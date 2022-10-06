@@ -70,14 +70,14 @@ $ acss watch abc252  # url が https://atcoder.jp/contests/ で始まらない�
 |オプション|説明|例|
 |:-|:-|:-|
 | `-h, --help` | ヘルプを表示します。 | `acss watch -h` |
-| `--no-color` | 色付きの出力をオフにします。 | `acss watch URL --no-color` |
-| `--tasks` | 問題で絞り込みます。 | `acss watch URL --task a b ex` |
-| `--languages` | 言語で絞り込みます。 | `acss watch URL --languages C++ C#` |
-| `--statuses` | ジャッジの状態で絞り込みます 。| `acss watch URL --statuses WA TLE RE` |
-| `-u, --users`| ユーザ名で絞り込みます。 | `acss watch URL -u user1 user2` |
-| `--info-level` | 提出の情報の詳しさを設定します。（`MINIMAL, NORMAL, DETAILS` の3段階） | `acss watch URL --info-level MINIMAL` |
-| `-r, --reverse` | 提出を逆順に表示します。 | `acss watch URL -r` |
-| `-t, --tail` | 全提出のうち指定した数だけ出力します。 | `acss watch URL -t 5` |
+| `--no-color` | 色付きの出力をオフにします。 | `acss watch abc252 --no-color` |
+| `--tasks` | 問題で絞り込みます。 | `acss watch abc252 --task a b ex` |
+| `--languages` | 言語で絞り込みます。 | `acss watch abc252 --languages C++ C#` |
+| `--statuses` | ジャッジの状態で絞り込みます 。| `acss watch abc252 --statuses WA TLE RE` |
+| `-u, --users`| ユーザ名で絞り込みます。 | `acss watch abc252 -u user1 user2` |
+| `--info-level` | 提出の情報の詳しさを設定します。（`MINIMAL, NORMAL, DETAILS` の3段階） | `acss watch abc252 --info-level MINIMAL` |
+| `-r, --reverse` | 提出を逆順に表示します。 | `acss watch abc252 -r` |
+| `-t, --tail` | 全提出のうち指定した数だけ出力します。 | `acss watch abc252 -t 5` |
 
 ### 提出一覧の保存
 
@@ -95,15 +95,15 @@ $ acss fetch URL -o result.csv  # result.csv に出力
 |オプション|説明|例|
 |:-|:-|:-|
 | `-h, --help` | ヘルプを表示します。 | `acss fetch -h` |
-| `-o` | 結果の出力先を指定します。 | `acss fetch URL -o result.csv` |
-| `-S, --separator` | 区切り文字を変更します。 | `acss fetch URL -s '\t' -o result.tsv` |
-| `-e, --encoding` | 文字コードを変更します。 | `acss fetch URL -e 'sjis' -o result.csv` |
-| `--tasks` | 問題で絞り込みます。 | `acss fetch URL --task a b ex` |
-| `--languages` | 言語で絞り込みます。 | `acss fetch URL --languages C++ C#` |
-| `--statuses` | ジャッジの状態で絞り込みます 。| `acss fetch URL --statuses WA TLE RE` |
-| `-u, --users`| ユーザ名で絞り込みます。 | `acss fetch URL -u user1 user2` |
-| `--info-level` | 提出の情報の詳しさを設定します。（`MINIMAL, NORMAL, DETAILS` の3段階） | `acss fetch URL --info-level MINIMAL` |
-| `-t, --tail` | 全提出のうち指定した数だけ出力します。 | `acss fetch URL -t 5` |
+| `-o` | 結果の出力先を指定します。 | `acss fetch abc252 -o result.csv` |
+| `-S, --separator` | 区切り文字を変更します。 | `acss fetch abc252 -s '\t' -o result.tsv` |
+| `-e, --encoding` | 文字コードを変更します。 | `acss fetch abc252 -e 'sjis' -o result.csv` |
+| `--tasks` | 問題で絞り込みます。 | `acss fetch abc252 --task a b ex` |
+| `--languages` | 言語で絞り込みます。 | `acss fetch abc252 --languages C++ C#` |
+| `--statuses` | ジャッジの状態で絞り込みます 。| `acss fetch abc252 --statuses WA TLE RE` |
+| `-u, --users`| ユーザ名で絞り込みます。 | `acss fetch abc252 -u user1 user2` |
+| `--info-level` | 提出の情報の詳しさを設定します。（`MINIMAL, NORMAL, DETAILS` の3段階） | `acss fetch abc252 --info-level MINIMAL` |
+| `-t, --tail` | 全提出のうち指定した数だけ出力します。 | `acss fetch abc252 -t 5` |
 
 
 ## インストール
