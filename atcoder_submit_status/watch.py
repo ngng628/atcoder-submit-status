@@ -52,7 +52,7 @@ def run(args: argparse.Namespace) -> bool:
       logger.debug('start session')
       if not srv.is_logged_in(session):
          logger.info(utils.FAILURE + 'You are not signed in.')
-         logger.info(utils.HINT + 'You can try to enter this command: `acss login {atcoder}`')
+         logger.info(utils.HINT + f'You can try to enter this command: `acss login {srv.get_name()}`')
          return False
 
       submissions = []
